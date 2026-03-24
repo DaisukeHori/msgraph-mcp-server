@@ -647,4 +647,86 @@ Returns: ファイル/フォルダ一覧`,
       }
     }
   );
+
+  // -------------------------------------------------------
+  // onedrive_resolve_sharing_link
+  // -------------------------------------------------------
+  server.registerTool(
+    "onedrive_resolve_sharing_link",
+    {
+      title: "Resolve Sharing Link",
+      description: `共有リンク（URL）からファイル/フォルダのメタデータを取得する。
+Teams チャットやメールで送られた OneDrive / SharePoint の共有リンクを解決して、
+ファイル名・サイズ・ドライブID・アイテムID 等を返す。
+
+取得した driveId と id を使って onedrive_shared_item_browse でフォルダの中身を閲覧したり、
+onedrive_get_item や onedrive_download_file でファイルの詳細やダウンロードが可能。
+
+Args:
+  - url (必須): 共有リンク URL（SharePoint / OneDrive の共有 URL）
+  - expand_children: true にするとフォルダの場合に中身（子アイテム）も返す
+
+Returns: ファイル/フォルダのメタデータ（名前、サイズ、ドライブID、アイテムID、webUrl）`,
+      inputSchema: {
+        url: z.string().url().describe("共有リンク URL（SharePoint / OneDrive の共有 URL）"),
+        expand_children: z.boolean().default(false).describe("フォルダの場合に子アイテムも返すか"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params) => {
+      try {
+        // 共有リンクを Shares API 用のトークンに変換
+        // https://learn.microsoft.com/en-us/graph/api/shares-get
+        const base64 = Buffer.from(params.url).toString("base64");
+        const sharingToken = "u!" + base64.replace(/=/g, "").replace(/\//g, "_").replace(/\+/g, "-");
+
+        const expand = params.expand_children ? "?$expand=children" : "";
+        const data = await graphGet<DriveItem>(
+          `/shares/${sharingToken}/driveItem${expand}`
+        );
+
+        const result: Record<string, unknown> = {
+          id: data.id,
+          name: data.name,
+          type: data.folder ? "folder" : "file",
+          size: data.size,
+          mimeType: data.file?.mimeType,
+          webUrl: data.webUrl,
+          lastModifiedDateTime: data.lastModifiedDateTime,
+          driveId: data.parentReference?.driveId,
+          parentId: data.parentReference?.id,
+          parentPath: data.parentReference?.path,
+          lastModifiedBy: data.lastModifiedBy,
+        };
+
+        // フォルダの子アイテム
+        if (data.folder) {
+          result.childCount = data.folder.childCount;
+        }
+        if ((data as unknown as Record<string, unknown>).children) {
+          const children = (data as unknown as Record<string, unknown>).children as DriveItem[];
+          result.children = children.map((child) => ({
+            id: child.id,
+            name: child.name,
+            type: child.folder ? "folder" : "file",
+            size: child.size,
+            mimeType: child.file?.mimeType,
+            webUrl: child.webUrl,
+            lastModifiedDateTime: child.lastModifiedDateTime,
+          }));
+        }
+
+        return {
+          content: [{ type: "text", text: truncateResponse(JSON.stringify(result, null, 2)) }],
+        };
+      } catch (error) {
+        return { content: [{ type: "text", text: handleToolError(error) }] };
+      }
+    }
+  );
 }
