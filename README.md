@@ -78,7 +78,46 @@ cd msgraph-mcp-server
 npm install
 ```
 
-### ステップ 3: Claude Desktop に設定
+### ステップ 3: 事前認証（ターミナルで 1 回だけ）
+
+⚠️ **この手順が重要です。** Claude Desktop は MCP サーバーをバックグラウンドで起動するため、
+認証画面が表示されません。**先にターミナルで認証を済ませる**必要があります。
+
+```bash
+cd msgraph-mcp-server
+
+MICROSOFT_CLIENT_ID=ステップ1のクライアントID \
+MICROSOFT_TENANT_ID=ステップ1のテナントID \
+npx tsx lib/auth-setup.ts
+```
+
+以下の手順が表示されます:
+
+```
+┌─────────────────────────────────────────────────┐
+│                                                 │
+│  1. ブラウザで以下の URL を開く:                │
+│     https://microsoft.com/devicelogin           │
+│                                                 │
+│  2. コードを入力: ABCD1234                      │
+│                                                 │
+│  3. Microsoft アカウントでサインイン             │
+│                                                 │
+│  4. 権限を許可                                  │
+│                                                 │
+└─────────────────────────────────────────────────┘
+```
+
+1. ブラウザで https://microsoft.com/devicelogin を開く
+2. 表示されたコードを入力
+3. あなたの Microsoft アカウントでサインイン
+4. 権限を許可
+5. ターミナルに「✅ 認証成功！」と表示されれば完了
+
+トークンは `~/.msgraph-mcp-token-cache.json` にキャッシュされ、自動的に更新されます。
+**通常この手順は 1 回だけ**で、以降は Claude Desktop が自動的にキャッシュを使います。
+
+### ステップ 4: Claude Desktop に設定
 
 `claude_desktop_config.json`:
 ```json
@@ -97,26 +136,7 @@ npm install
 }
 ```
 
-### ステップ 4: 初回認証
-
-初めてツールを呼ぶと、ターミナルに以下が表示されます:
-
-```
-═══════════════════════════════════════════════════
-🔐 Microsoft アカウントへのサインインが必要です
-═══════════════════════════════════════════════════
-To sign in, use a web browser to open the page
-https://microsoft.com/devicelogin and enter the
-code XXXXXXXX to authenticate.
-═══════════════════════════════════════════════════
-```
-
-1. ブラウザで https://microsoft.com/devicelogin を開く
-2. 表示されたコードを入力
-3. Microsoft アカウントでサインイン
-4. 権限を許可
-
-**これで完了です。** 以降はトークンが `~/.msgraph-mcp-token-cache.json` にキャッシュされ、自動的に更新されます。
+Claude Desktop を再起動すれば、Microsoft 365 のツールが使えます。
 
 ---
 

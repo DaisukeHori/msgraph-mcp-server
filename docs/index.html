@@ -323,10 +323,36 @@
 
       <div class="sc">
         <div class="sc-n">2</div>
-        <h3>クローンして Claude Desktop に設定</h3>
+        <h3>事前認証（ターミナルで 1 回だけ）</h3>
         <p>
-          <code>git clone https://github.com/DaisukeHori/msgraph-mcp-server.git && cd msgraph-mcp-server && npm install</code><br><br>
-          <code>claude_desktop_config.json</code> に以下を追加:
+          ⚠️ <strong>Claude Desktop はバックグラウンドで MCP を起動するため、認証画面が出ません。</strong><br>
+          先にターミナルでこのコマンドを実行して、ブラウザで Microsoft にサインインしてください:
+        </p>
+        <div class="terminal" style="margin-top:12px;max-width:100%">
+          <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>ターミナル</span></div>
+          <div class="t-body" style="font-size:12px;line-height:1.7">
+<span class="c"># クローン & インストール</span>
+<span class="gr">git</span> clone https://github.com/DaisukeHori/msgraph-mcp-server.git
+<span class="gr">cd</span> msgraph-mcp-server && <span class="gr">npm</span> install
+
+<span class="c"># 事前認証（ブラウザが開きます）</span>
+MICROSOFT_CLIENT_ID=<span class="o">your-id</span> \
+MICROSOFT_TENANT_ID=<span class="o">your-id</span> \
+<span class="gr">npx</span> tsx <span class="o">lib/auth-setup.ts</span>
+          </div>
+        </div>
+        <p style="margin-top:8px">
+          ① ブラウザで <a href="https://microsoft.com/devicelogin" target="_blank">microsoft.com/devicelogin</a> を開く<br>
+          ② 表示されたコードを入力 → Microsoft アカウントでサインイン → 権限を許可<br>
+          ③ ターミナルに「✅ 認証成功！」と出れば完了（<strong>以降は自動更新</strong>）
+        </p>
+      </div>
+
+      <div class="sc">
+        <div class="sc-n">3</div>
+        <h3>Claude Desktop に設定して使い始める</h3>
+        <p>
+          <code>claude_desktop_config.json</code> に以下を追加して再起動。認証済みなので即動きます:
         </p>
         <div class="terminal" style="margin-top:12px;max-width:100%">
           <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>claude_desktop_config.json</span></div>
@@ -348,15 +374,6 @@
         </div>
       </div>
 
-      <div class="sc">
-        <div class="sc-n">3</div>
-        <h3>初回認証（1回だけ）</h3>
-        <p>
-          ツールを初めて呼ぶと、ターミナルに <strong>コード</strong> が表示されます。<br>
-          ① ブラウザで <a href="https://microsoft.com/devicelogin" target="_blank">microsoft.com/devicelogin</a> を開く<br>
-          ② コードを入力 → Microsoft アカウントでサインイン → 権限を許可<br>
-          ③ <strong>完了！</strong> 以降はトークンが自動更新され、再認証は不要です。
-        </p>
       </div>
     </div>
   </div>

@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "stdio": "npx tsx lib/stdio.ts"
+    "stdio": "npx tsx lib/stdio.ts",
+    "auth": "npx tsx lib/auth-setup.ts"
   },
   "keywords": [
     "mcp",
