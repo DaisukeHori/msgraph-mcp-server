@@ -270,9 +270,24 @@ export default function AuthPage() {
 
             <div style={{ marginTop: 16 }}>
               <p style={{ fontSize: 13, color: "#616161", lineHeight: 1.7 }}>
-                <strong>MCP クライアントの設定:</strong><br />
-                URL: <code style={styles.inlineCode}>{typeof window !== "undefined" ? window.location.origin : ""}/api/mcp</code><br />
-                ヘッダー: <code style={styles.inlineCode}>Authorization: Bearer &lt;上記のキー&gt;</code>
+                <strong>Claude.ai で接続:</strong><br />
+                設定 → コネクタ → カスタムコネクタを追加<br />
+                名前: <code style={styles.inlineCode}>Microsoft 365</code><br />
+                URL: <code style={styles.inlineCode}>{typeof window !== "undefined" ? window.location.origin : ""}/api/mcp?key={newApiKey || "<APIキー>"}</code><br />
+                OAuth の欄は空のまま →「追加」
+              </p>
+              <p style={{ fontSize: 13, color: "#616161", lineHeight: 1.7, marginTop: 8 }}>
+                <strong>Claude Desktop（JSON）:</strong><br />
+                <code style={{ ...styles.inlineCode, display: "block", whiteSpace: "pre-wrap", padding: 8, marginTop: 4 }}>
+{`{
+  "mcpServers": {
+    "microsoft365": {
+      "type": "url",
+      "url": "${typeof window !== "undefined" ? window.location.origin : ""}/api/mcp?key=${newApiKey || "<APIキー>"}"
+    }
+  }
+}`}
+                </code>
               </p>
             </div>
 

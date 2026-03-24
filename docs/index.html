@@ -361,10 +361,30 @@
       <div class="sc">
         <div class="sc-n">4</div>
         <h3>MCP クライアントに接続して使い始める</h3>
-        <p>
-          Claude.ai / Claude Desktop で MCP サーバーを追加:<br>
-          URL: <code>https://your-app.vercel.app/api/mcp</code><br>
-          ヘッダー: <code>Authorization: Bearer &lt;ステップ3のAPIキー&gt;</code><br><br>
+        <p><strong>Claude.ai（Web / モバイル）:</strong><br>
+          設定 → コネクタ → カスタムコネクタを追加:<br>
+          • 名前: <code>Microsoft 365</code>（任意）<br>
+          • URL: <code>https://your-app.vercel.app/api/mcp?key=&lt;ステップ3のAPIキー&gt;</code><br>
+          • OAuth の欄は<strong>空のまま</strong> →「追加」→ 新しいチャットで利用開始
+        </p>
+        <p style="margin-top:12px"><strong>Claude Desktop（JSON設定）:</strong></p>
+        <div class="terminal" style="max-width:100%">
+          <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>claude_desktop_config.json</span></div>
+          <div class="t-body" style="font-size:12px;line-height:1.7">
+<span class="c">{</span>
+  <span class="o">"mcpServers"</span><span class="c">: {</span>
+    <span class="o">"microsoft365"</span><span class="c">: {</span>
+      <span class="o">"type"</span>: <span class="gr">"url"</span>,
+      <span class="o">"url"</span>: <span class="gr">"https://your-app.vercel.app/api/mcp?key=&lt;APIキー&gt;"</span>
+    <span class="c">}</span>
+  <span class="c">}</span>
+<span class="c">}</span>
+          </div>
+        </div>
+        <p style="margin-top:12px"><strong>Claude Code:</strong><br>
+          <code>claude mcp add --transport http microsoft365 "https://your-app.vercel.app/api/mcp?key=&lt;APIキー&gt;"</code>
+        </p>
+        <p style="margin-top:12px">
           <strong>以降一切何もしなくていい。</strong>Cron が毎日トークンを自動更新し続けます。
         </p>
       </div>

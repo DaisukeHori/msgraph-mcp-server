@@ -137,10 +137,38 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 
 ### ステップ 5: MCP クライアントに接続して使い始める
 
-Claude.ai / Claude Desktop で MCP サーバーを追加:
+#### Claude.ai（Web / モバイル）
 
-- URL: `https://your-app.vercel.app/api/mcp`
-- ヘッダー: `Authorization: Bearer <ステップ4のAPIキー>`
+1. 設定 → **コネクタ** → **カスタムコネクタを追加**
+2. 以下を入力:
+   - **名前**: `Microsoft 365`（任意）
+   - **リモートMCPサーバーURL**: `https://your-app.vercel.app/api/mcp?key=<ステップ4のAPIキー>`
+   - **OAuth Client ID**: 空のまま
+   - **OAuth クライアントシークレット**: 空のまま
+3. 「追加」→ **新しいチャットを開いて**使い始める
+
+> ⚠️ Claude.ai のカスタムコネクタには Bearer Token の入力欄がないため、`?key=` パラメータで API キーを渡します。
+
+#### Claude Desktop
+
+`claude_desktop_config.json` に以下を追加:
+
+```json
+{
+  "mcpServers": {
+    "microsoft365": {
+      "type": "url",
+      "url": "https://your-app.vercel.app/api/mcp?key=<ステップ4のAPIキー>"
+    }
+  }
+}
+```
+
+#### Claude Code
+
+```bash
+claude mcp add --transport http microsoft365 "https://your-app.vercel.app/api/mcp?key=<ステップ4のAPIキー>"
+```
 
 **以降一切何もしなくていい。** Cron が毎日トークンを自動更新し続けます。
 
