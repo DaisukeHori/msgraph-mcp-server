@@ -13,6 +13,7 @@ import {
 } from "@/lib/msgraph/graph-client";
 import { DriveItem, Drive } from "@/lib/msgraph/types";
 import { DEFAULT_PAGE_SIZE } from "@/lib/config";
+import { userBase } from "./shared-helpers";
 
 export function registerOneDriveTools(server: McpServer): void {
   // -------------------------------------------------------
@@ -83,7 +84,7 @@ Returns: List of items with name, size, type, dates, webUrl`,
         let endpoint: string;
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
 
         if (params.folder_id) {
           endpoint = `${drivePrefix}/items/${params.folder_id}/children`;
@@ -154,7 +155,7 @@ Returns: Full item metadata`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
         let endpoint: string;
 
         if (params.item_id) {
@@ -208,7 +209,7 @@ Returns: File content (text or base64) and content type`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
         let endpoint: string;
 
         if (params.item_id) {
@@ -265,7 +266,7 @@ Returns: Created/updated item details`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
         const cleanPath = params.path.startsWith("/") ? params.path : `/${params.path}`;
         const endpoint = `${drivePrefix}/root:${cleanPath}:/content`;
 
@@ -323,7 +324,7 @@ Returns: Created folder details`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
         let endpoint: string;
 
         if (params.parent_id) {
@@ -381,7 +382,7 @@ Returns: Confirmation`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
         await graphDelete(`${drivePrefix}/items/${params.item_id}`);
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, message: "Item deleted (moved to recycle bin)" }) }],
@@ -427,7 +428,7 @@ Returns: Updated item details`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
 
         const body: Record<string, unknown> = {};
         if (params.new_name) body.name = params.new_name;
@@ -482,7 +483,7 @@ Returns: List of matching items`,
       try {
         const drivePrefix = params.drive_id
           ? `/drives/${params.drive_id}`
-          : "/me/drive";
+          : `${userBase()}/drive`;
 
         const data = await graphGet<GraphPagedResponse<DriveItem>>(
           `${drivePrefix}/root/search(q='${encodeURIComponent(params.query)}')`,

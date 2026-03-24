@@ -12,7 +12,9 @@ import { randomBytes, createHash } from "crypto";
 const SCOPES = [
   "User.Read",
   "Mail.Read", "Mail.ReadWrite", "Mail.Send",
+  "Mail.Read.Shared", "Mail.ReadWrite.Shared", "Mail.Send.Shared",
   "Calendars.Read", "Calendars.ReadWrite",
+  "Calendars.Read.Shared", "Calendars.ReadWrite.Shared",
   "Team.ReadBasic.All", "Channel.ReadBasic.All",
   "ChannelMessage.Read.All", "ChannelMessage.Send",
   "Chat.Read", "Chat.ReadWrite", "ChatMessage.Read", "ChatMessage.Send",

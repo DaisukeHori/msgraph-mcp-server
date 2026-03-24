@@ -11,6 +11,7 @@ import {
 } from "@/lib/msgraph/graph-client";
 import { CalendarEvent } from "@/lib/msgraph/types";
 import { DEFAULT_PAGE_SIZE } from "@/lib/config";
+import { userBase, USER_ID_DESCRIPTION } from "./shared-helpers";
 
 export function registerCalendarTools(server: McpServer): void {
   // -------------------------------------------------------
@@ -34,6 +35,7 @@ Args:
 
 Returns: List of events with subject, start/end, location, organizer, attendees`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         start_datetime: z.string().optional().describe("Start datetime ISO 8601"),
         end_datetime: z.string().optional().describe("End datetime ISO 8601"),
         search: z.string().optional().describe("Search query"),
@@ -72,7 +74,7 @@ Returns: List of events with subject, start/end, location, organizer, attendees`
         // Otherwise use events endpoint
         const evtPath = params.calendar_id
           ? `/me/calendars/${params.calendar_id}/events`
-          : "/me/events";
+          : `${userBase(params.user_id)}/events`;
         const queryParams: Record<string, string | number | boolean | undefined> = {
           $top: params.top,
           $orderby: params.orderby,
@@ -106,6 +108,7 @@ Args:
 
 Returns: Full event details including body, attendees, recurrence`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         event_id: z.string().min(1).describe("Event ID"),
       },
       annotations: {
@@ -117,7 +120,7 @@ Returns: Full event details including body, attendees, recurrence`,
     },
     async (params) => {
       try {
-        const event = await graphGet<CalendarEvent>(`/me/events/${params.event_id}`);
+        const event = await graphGet<CalendarEvent>(`${userBase(params.user_id)}/events/${params.event_id}`);
         return {
           content: [{ type: "text", text: truncateResponse(JSON.stringify(event, null, 2)) }],
         };
@@ -152,6 +155,7 @@ Args:
 
 Returns: Created event details`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         subject: z.string().min(1).describe("Event subject"),
         start_datetime: z.string().min(1).describe("Start datetime ISO 8601"),
         end_datetime: z.string().min(1).describe("End datetime ISO 8601"),
@@ -208,7 +212,7 @@ Returns: Created event details`,
           eventBody.reminderMinutesBeforeStart = params.reminder_minutes;
         }
 
-        const created = await graphPost<CalendarEvent>("/me/events", eventBody);
+        const created = await graphPost<CalendarEvent>(`${userBase(params.user_id)}/events`, eventBody);
 
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, id: created.id, subject: created.subject, webLink: created.webLink }, null, 2) }],
@@ -239,6 +243,7 @@ Args:
 
 Returns: Updated event`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         event_id: z.string().min(1).describe("Event ID"),
         subject: z.string().optional().describe("New subject"),
         start_datetime: z.string().optional().describe("New start datetime"),
@@ -268,7 +273,7 @@ Returns: Updated event`,
         if (params.show_as) updates.showAs = params.show_as;
         if (params.is_online_meeting !== undefined) updates.isOnlineMeeting = params.is_online_meeting;
 
-        const updated = await graphPatch<CalendarEvent>(`/me/events/${params.event_id}`, updates);
+        const updated = await graphPatch<CalendarEvent>(`${userBase(params.user_id)}/events/${params.event_id}`, updates);
 
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, id: updated.id, subject: updated.subject }, null, 2) }],
@@ -293,6 +298,7 @@ Args:
 
 Returns: Confirmation`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         event_id: z.string().min(1).describe("Event ID"),
       },
       annotations: {
@@ -304,7 +310,7 @@ Returns: Confirmation`,
     },
     async (params) => {
       try {
-        await graphDelete(`/me/events/${params.event_id}`);
+        await graphDelete(`${userBase(params.user_id)}/events/${params.event_id}`);
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, message: "Event deleted" }) }],
         };

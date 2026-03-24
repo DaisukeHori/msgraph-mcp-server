@@ -9,6 +9,7 @@ import {
 } from "@/lib/msgraph/graph-client";
 import { Team, Channel, ChatMessage, Chat } from "@/lib/msgraph/types";
 import { DEFAULT_PAGE_SIZE } from "@/lib/config";
+import { userBase, USER_ID_DESCRIPTION } from "./shared-helpers";
 
 export function registerTeamsTools(server: McpServer): void {
   // -------------------------------------------------------
@@ -21,7 +22,9 @@ export function registerTeamsTools(server: McpServer): void {
       description: `List all Teams that the signed-in user is a member of.
 
 Returns: List of teams with id, displayName, description, isArchived`,
-      inputSchema: {},
+      inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
+      },
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -29,9 +32,9 @@ Returns: List of teams with id, displayName, description, isArchived`,
         openWorldHint: false,
       },
     },
-    async () => {
+    async (params) => {
       try {
-        const data = await graphGet<GraphPagedResponse<Team>>("/me/joinedTeams");
+        const data = await graphGet<GraphPagedResponse<Team>>(`${userBase(params.user_id)}/joinedTeams`);
         const output = data.value.map((t) => ({
           id: t.id,
           displayName: t.displayName,
@@ -260,6 +263,7 @@ Args:
 
 Returns: List of chats with id, topic, chatType, lastUpdatedDateTime`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         top: z.number().int().min(1).max(50).default(DEFAULT_PAGE_SIZE).describe("Number of chats"),
         filter: z.string().optional().describe("OData filter"),
       },
@@ -278,7 +282,7 @@ Returns: List of chats with id, topic, chatType, lastUpdatedDateTime`,
         };
         if (params.filter) queryParams.$filter = params.filter;
 
-        const data = await graphGet<GraphPagedResponse<Chat>>("/me/chats", queryParams);
+        const data = await graphGet<GraphPagedResponse<Chat>>(`${userBase(params.user_id)}/chats`, queryParams);
 
         const chats = data.value.map((c) => ({
           id: c.id,
@@ -312,6 +316,7 @@ Args:
 
 Returns: List of chat messages`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         chat_id: z.string().min(1).describe("Chat ID"),
         top: z.number().int().min(1).max(50).default(DEFAULT_PAGE_SIZE).describe("Number of messages"),
       },
@@ -325,7 +330,7 @@ Returns: List of chat messages`,
     async (params) => {
       try {
         const data = await graphGet<GraphPagedResponse<ChatMessage>>(
-          `/me/chats/${params.chat_id}/messages`,
+          `${userBase(params.user_id)}/chats/${params.chat_id}/messages`,
           { $top: params.top }
         );
 
@@ -362,6 +367,7 @@ Args:
 
 Returns: Created message details`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         chat_id: z.string().min(1).describe("Chat ID"),
         content: z.string().min(1).describe("Message content"),
         content_type: z.enum(["html", "text"]).default("html").describe("Content type"),
@@ -376,7 +382,7 @@ Returns: Created message details`,
     async (params) => {
       try {
         const msg = await graphPost<ChatMessage>(
-          `/me/chats/${params.chat_id}/messages`,
+          `${userBase(params.user_id)}/chats/${params.chat_id}/messages`,
           { body: { contentType: params.content_type, content: params.content } }
         );
 

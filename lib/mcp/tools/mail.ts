@@ -11,6 +11,7 @@ import {
 } from "@/lib/msgraph/graph-client";
 import { MailMessage, MailFolder, SendMailPayload } from "@/lib/msgraph/types";
 import { DEFAULT_PAGE_SIZE } from "@/lib/config";
+import { userBase, USER_ID_DESCRIPTION } from "./shared-helpers";
 
 export function registerMailTools(server: McpServer): void {
   // -------------------------------------------------------
@@ -35,6 +36,7 @@ Args:
 
 Returns: List of messages with id, subject, from, receivedDateTime, bodyPreview, isRead, importance`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         folder_id: z.string().default("inbox").describe("Folder ID or well-known name"),
         search: z.string().optional().describe("KQL search query"),
         filter: z.string().optional().describe("OData $filter expression"),
@@ -52,7 +54,7 @@ Returns: List of messages with id, subject, from, receivedDateTime, bodyPreview,
     },
     async (params) => {
       try {
-        const endpoint = `/me/mailFolders/${params.folder_id}/messages`;
+        const endpoint = `${userBase(params.user_id)}/mailFolders/${params.folder_id}/messages`;
         const queryParams: Record<string, string | number | boolean | undefined> = {
           $top: params.top,
           $skip: params.skip,
@@ -106,6 +108,7 @@ Args:
 
 Returns: Full message details including body, recipients, attachments info`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         message_id: z.string().min(1).describe("Message ID"),
         include_body: z.boolean().default(true).describe("Include full body"),
       },
@@ -124,7 +127,7 @@ Returns: Full message details including body, recipients, attachments info`,
         const queryParams: Record<string, string | number | boolean | undefined> = {};
         if (select) queryParams.$select = select;
 
-        const msg = await graphGet<MailMessage>(`/me/messages/${params.message_id}`, queryParams);
+        const msg = await graphGet<MailMessage>(`${userBase(params.user_id)}/messages/${params.message_id}`, queryParams);
 
         return {
           content: [{ type: "text", text: truncateResponse(JSON.stringify(msg, null, 2)) }],
@@ -154,6 +157,7 @@ Args:
 
 Returns: Confirmation of sent message`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         to: z.array(z.string().email()).min(1).describe("Recipient email addresses"),
         subject: z.string().min(1).describe("Email subject"),
         body: z.string().min(1).describe("Email body content"),
@@ -186,7 +190,7 @@ Returns: Confirmation of sent message`,
           }));
         }
 
-        await graphPost<void>("/me/sendMail", payload);
+        await graphPost<void>(`${userBase(params.user_id)}/sendMail`, payload);
 
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, message: `Email sent to ${params.to.join(", ")}` }) }],
@@ -213,6 +217,7 @@ Args:
 
 Returns: Confirmation`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         message_id: z.string().min(1).describe("Message ID to reply to"),
         comment: z.string().min(1).describe("Reply body content"),
         reply_all: z.boolean().default(false).describe("Reply to all recipients"),
@@ -227,7 +232,7 @@ Returns: Confirmation`,
     async (params) => {
       try {
         const action = params.reply_all ? "replyAll" : "reply";
-        await graphPost<void>(`/me/messages/${params.message_id}/${action}`, {
+        await graphPost<void>(`${userBase(params.user_id)}/messages/${params.message_id}/${action}`, {
           comment: params.comment,
         });
 
@@ -257,6 +262,7 @@ Args:
 
 Returns: Updated message`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         message_id: z.string().min(1).describe("Message ID"),
         is_read: z.boolean().optional().describe("Mark as read/unread"),
         importance: z.enum(["low", "normal", "high"]).optional().describe("Importance level"),
@@ -276,7 +282,7 @@ Returns: Updated message`,
         if (params.importance !== undefined) body.importance = params.importance;
         if (params.categories !== undefined) body.categories = params.categories;
 
-        const msg = await graphPatch<MailMessage>(`/me/messages/${params.message_id}`, body);
+        const msg = await graphPatch<MailMessage>(`${userBase(params.user_id)}/messages/${params.message_id}`, body);
 
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, id: msg.id, subject: msg.subject }) }],
@@ -301,6 +307,7 @@ Args:
 
 Returns: Confirmation`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         message_id: z.string().min(1).describe("Message ID to delete"),
       },
       annotations: {
@@ -312,7 +319,7 @@ Returns: Confirmation`,
     },
     async (params) => {
       try {
-        await graphDelete(`/me/messages/${params.message_id}`);
+        await graphDelete(`${userBase(params.user_id)}/messages/${params.message_id}`);
         return {
           content: [{ type: "text", text: JSON.stringify({ success: true, message: "Message deleted (moved to Deleted Items)" }) }],
         };
@@ -337,6 +344,7 @@ Args:
 
 Returns: Moved message details`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         message_id: z.string().min(1).describe("Message ID"),
         destination_folder: z.string().min(1).describe("Destination folder ID or well-known name"),
       },
@@ -350,7 +358,7 @@ Returns: Moved message details`,
     async (params) => {
       try {
         const result = await graphPost<MailMessage>(
-          `/me/messages/${params.message_id}/move`,
+          `${userBase(params.user_id)}/messages/${params.message_id}/move`,
           { destinationId: params.destination_folder }
         );
         return {
@@ -373,6 +381,7 @@ Returns: Moved message details`,
 
 Returns: List of folders with ID, name, unread count, total count`,
       inputSchema: {
+        user_id: z.string().optional().describe(USER_ID_DESCRIPTION),
         top: z.number().int().min(1).max(100).default(50).describe("Number of folders"),
       },
       annotations: {
@@ -384,7 +393,7 @@ Returns: List of folders with ID, name, unread count, total count`,
     },
     async (params) => {
       try {
-        const data = await graphGet<GraphPagedResponse<MailFolder>>("/me/mailFolders", {
+        const data = await graphGet<GraphPagedResponse<MailFolder>>(`${userBase(params.user_id)}/mailFolders`, {
           $top: params.top,
         });
 
