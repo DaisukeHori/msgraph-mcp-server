@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>msgraph-mcp-server — Microsoft 365 を AI エージェントから操作する</title>
-  <meta name="description" content="Exchange・Teams・OneDrive・SharePoint の 45 ツールを MCP (Model Context Protocol) で提供。Claude や AI エージェントから Microsoft 365 を直接 CRUD 操作。">
+  <meta name="description" content="Exchange・Teams・OneDrive・SharePoint の 47 ツールを MCP (Model Context Protocol) で提供。Claude や AI エージェントから Microsoft 365 を直接 CRUD 操作。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -165,7 +165,7 @@
       <a href="#setup">セットアップ</a>
       <a href="#hubspot">HubSpot MA MCP</a>
       <a href="https://github.com/DaisukeHori/msgraph-mcp-server" target="_blank">GitHub</a>
-      <span class="nav-badge">45 ツール</span>
+      <span class="nav-badge">47 ツール</span>
     </div>
   </div>
 </nav>
@@ -176,7 +176,7 @@
       <div class="hero-badge"><span class="dot"></span>MCP Server &middot; MIT ライセンス &middot; TypeScript</div>
       <h1><span class="br">Microsoft 365</span> を<br>AI エージェントから操作する</h1>
       <p class="hero-sub">
-        Exchange・Teams・OneDrive・SharePoint の 45 ツールを<br>
+        Exchange・Teams・OneDrive・SharePoint の 47 ツールを<br>
         Model Context Protocol (MCP) で Claude や AI エージェントに提供します。<br>
         メール送信、予定作成、ファイル管理、リスト操作 — すべて自然言語で。
       </p>
@@ -213,7 +213,7 @@
 
 <section id="tools" class="sec">
   <div class="ctn">
-    <div class="sec-h"><h2>全サービス、完全 CRUD</h2><p>6 つの Microsoft 365 ドメインにまたがる 45 ツール — 読取・書込・更新・削除</p></div>
+    <div class="sec-h"><h2>全サービス、完全 CRUD</h2><p>6 つの Microsoft 365 ドメインにまたがる 47 ツール — 読取・書込・更新・削除</p></div>
     <div class="domains">
       <div class="dc">
         <div class="dc-top"><div class="dc-in"><div class="dc-icon di1">📧</div><span class="dc-name">Exchange / メール</span></div><span class="dc-cnt">8 ツール</span></div>
@@ -321,6 +321,14 @@
           <span class="tag">Sites.Read.All</span>
           <span class="tag">Sites.ReadWrite.All</span>
           <span class="tag">offline_access</span>
+        </div>
+        <p style="margin-top:8px;font-size:13px;color:#616161"><strong>共有リソース用（共有メールボックス・委任カレンダー）:</strong></p>
+        <div class="tags">
+          <span class="tag" style="background:#FFF4CE;border-color:#FFB900">Mail.Read.Shared</span>
+          <span class="tag" style="background:#FFF4CE;border-color:#FFB900">Mail.ReadWrite.Shared</span>
+          <span class="tag" style="background:#FFF4CE;border-color:#FFB900">Mail.Send.Shared</span>
+          <span class="tag" style="background:#FFF4CE;border-color:#FFB900">Calendars.Read.Shared</span>
+          <span class="tag" style="background:#FFF4CE;border-color:#FFB900">Calendars.ReadWrite.Shared</span>
         </div>
         <p style="margin-top:8px">
           ⑦「<strong>管理者の同意を与えます</strong>」をクリック<br>
