@@ -433,6 +433,146 @@
       margin-top: 8px;
     }
 
+    /* --- FEATURED PROJECT --- */
+    .featured { margin-bottom: 120px; }
+    .featured-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+    }
+    .featured-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #FF7A59, #f59e0b, #FF7A59);
+    }
+    .featured-left {
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .featured-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #FF7A59;
+      margin-bottom: 16px;
+    }
+    .featured-left h3 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .featured-left h3 .hs-gradient {
+      background: linear-gradient(135deg, #FF7A59, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .featured-desc {
+      font-size: 16px;
+      color: var(--text-dim);
+      font-weight: 300;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .featured-desc strong { color: var(--text); font-weight: 600; }
+    .featured-stats-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .featured-stat {
+      text-align: center;
+    }
+    .featured-stat-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      color: #FF7A59;
+    }
+    .featured-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+    .featured-actions { display: flex; gap: 12px; }
+    .btn-hubspot {
+      background: #FF7A59;
+      color: white;
+      box-shadow: 0 0 30px rgba(255,122,89,0.2);
+    }
+    .btn-hubspot:hover { background: #ff8f73; transform: translateY(-2px); box-shadow: 0 0 40px rgba(255,122,89,0.35); }
+
+    .featured-right {
+      background: var(--surface-2);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 1px solid var(--border);
+    }
+    .featured-arch {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.8;
+      color: var(--text-dim);
+    }
+    .featured-arch .layer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .featured-arch .layer:hover {
+      border-color: #FF7A5940;
+      box-shadow: 0 4px 20px rgba(255,122,89,0.08);
+    }
+    .featured-arch .layer-title {
+      font-weight: 700;
+      color: #FF7A59;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .featured-arch .layer-detail {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .featured-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 16px;
+    }
+    .cat-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .featured-card { grid-template-columns: 1fr; }
+      .featured-right { border-left: none; border-top: 1px solid var(--border); }
+    }
+
     /* --- FOOTER --- */
     footer {
       border-top: 1px solid var(--border);
@@ -735,6 +875,92 @@
       <h3>Connect to Claude</h3>
       <p>Add to Claude Desktop or Claude Code with your Client ID.</p>
       <code>claude mcp add msgraph</code>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED: HubSpot MA MCP -->
+<section class="container featured">
+  <div class="section-title">
+    <h2>From the Same Author</h2>
+    <p>The Enterprise MCP ecosystem — Microsoft 365 + HubSpot, from one developer.</p>
+  </div>
+
+  <div class="featured-card">
+    <div class="featured-left">
+      <div class="featured-eyebrow">★ Flagship Project</div>
+      <h3>
+        <span class="hs-gradient">HubSpot MA</span><br>
+        MCP Server
+      </h3>
+      <p class="featured-desc">
+        <strong>「来月セミナーやるからよろしく」</strong>と言うだけで、キャンペーン作成・フォーム作成・リスト作成・メール配信・ワークフロー設計まで AI が一貫して実行。<br><br>
+        単なる API ラッパーではなく、<strong>Knowledge Store（暗黙知の記憶）</strong>と <strong>Claude Skill（行動規範）</strong>の 3 層構造で<strong>あなたの会社の HubSpot を理解した MA 担当者</strong>として機能します。
+      </p>
+      <div class="featured-stats-row">
+        <div class="featured-stat">
+          <div class="featured-stat-number">128</div>
+          <div class="featured-stat-label">MCP Tools</div>
+        </div>
+        <div class="featured-stat">
+          <div class="featured-stat-number">18</div>
+          <div class="featured-stat-label">API Categories</div>
+        </div>
+        <div class="featured-stat">
+          <div class="featured-stat-number">v3/v4</div>
+          <div class="featured-stat-label">HubSpot API</div>
+        </div>
+        <div class="featured-stat">
+          <div class="featured-stat-number">3</div>
+          <div class="featured-stat-label">Layer Architecture</div>
+        </div>
+      </div>
+      <div class="featured-actions">
+        <a href="https://github.com/DaisukeHori/hubspot-ma-mcp" class="btn btn-hubspot" target="_blank">
+          ⭐ View on GitHub
+        </a>
+        <a href="https://daisukehori.github.io/hubspot-ma-mcp/" class="btn btn-ghost" target="_blank">
+          🌐 Landing Page
+        </a>
+      </div>
+    </div>
+
+    <div class="featured-right">
+      <div class="featured-arch">
+        <div class="layer">
+          <div class="layer-title">🧠 Claude Skill（固定・全企業共通）</div>
+          <div class="layer-detail">MA 担当者としての判断規範 — Knowledge Store を毎回読み、自分で調べ尽くしてから人に聞く</div>
+        </div>
+        <div class="layer">
+          <div class="layer-title">📚 Knowledge Store（可変・企業固有）</div>
+          <div class="layer-detail">HubSpot CRM ノートに保存 — 設計判断・命名規則・手順書等 12 カテゴリ、使うほど成長</div>
+        </div>
+        <div class="layer">
+          <div class="layer-title">⚡ MCP Tools × 128</div>
+          <div class="layer-detail">HubSpot API v3/v4 完全カバー — CRM / Forms / Lists / Emails / Workflows / Campaigns</div>
+        </div>
+
+        <div class="featured-categories">
+          <span class="cat-tag">Contacts</span>
+          <span class="cat-tag">Companies</span>
+          <span class="cat-tag">Deals</span>
+          <span class="cat-tag">Tickets</span>
+          <span class="cat-tag">Engagements</span>
+          <span class="cat-tag">Associations v4</span>
+          <span class="cat-tag">Properties</span>
+          <span class="cat-tag">Pipelines</span>
+          <span class="cat-tag">Products</span>
+          <span class="cat-tag">Line Items</span>
+          <span class="cat-tag">Workflows v4</span>
+          <span class="cat-tag">Forms</span>
+          <span class="cat-tag">Lists</span>
+          <span class="cat-tag">Marketing Emails</span>
+          <span class="cat-tag">Campaigns</span>
+          <span class="cat-tag">Custom Events</span>
+          <span class="cat-tag">Marketing Events</span>
+          <span class="cat-tag">CMS Blog/Pages</span>
+        </div>
+      </div>
     </div>
   </div>
 </section>
