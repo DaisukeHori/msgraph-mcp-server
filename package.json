@@ -1,15 +1,13 @@
 {
   "name": "msgraph-mcp-server",
   "version": "1.1.0",
-  "description": "Microsoft Graph API MCP Server — 45 tools for Exchange, Teams, OneDrive, SharePoint CRUD via Model Context Protocol",
+  "description": "Microsoft Graph API MCP Server \u2014 45 tools for Exchange, Teams, OneDrive, SharePoint CRUD via Model Context Protocol",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "stdio": "npx tsx lib/stdio.ts",
-    "auth": "npx tsx lib/auth-setup.ts"
+    "lint": "next lint"
   },
   "keywords": [
     "mcp",
@@ -41,7 +39,6 @@
     "url": "https://github.com/DaisukeHori/msgraph-mcp-server/issues"
   },
   "dependencies": {
-    "@azure/msal-node": "^5.1.1",
     "@modelcontextprotocol/sdk": "^1.25.2",
     "@upstash/redis": "^1.37.0",
     "mcp-handler": "^1.0.7",
