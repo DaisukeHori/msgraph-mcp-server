@@ -11,10 +11,20 @@
     "stdio": "npx tsx lib/stdio.ts"
   },
   "keywords": [
-    "mcp", "mcp-server", "model-context-protocol",
-    "microsoft-graph", "microsoft-365",
-    "exchange", "outlook", "teams", "onedrive", "sharepoint",
-    "claude", "anthropic", "ai", "llm"
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "microsoft-graph",
+    "microsoft-365",
+    "exchange",
+    "outlook",
+    "teams",
+    "onedrive",
+    "sharepoint",
+    "claude",
+    "anthropic",
+    "ai",
+    "llm"
   ],
   "author": {
     "name": "Daisuke Hori",
@@ -30,6 +40,7 @@
     "url": "https://github.com/DaisukeHori/msgraph-mcp-server/issues"
   },
   "dependencies": {
+    "@azure/msal-node": "^5.1.1",
     "@modelcontextprotocol/sdk": "^1.25.2",
     "mcp-handler": "^1.0.7",
     "next": "^15",

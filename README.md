@@ -1,117 +1,84 @@
 # msgraph-mcp-server
 
-**Microsoft 365 を AI エージェントから操作する MCP サーバー**
+**本人として Microsoft 365 を AI エージェントから操作する MCP サーバー**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=AUTH_MODE%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID&envDescription=AUTH_MODE%3A+graph_token%28%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%29+or+client_credentials+or+api_key+%7C+Azure+AD+%E3%82%A2%E3%83%97%E3%83%AA%E8%A8%AD%E5%AE%9A&envLink=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server%23%E8%AA%8D%E8%A8%BC%E3%83%A2%E3%83%BC%E3%83%89&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=AUTH_MODE&envDescription=AUTH_MODE%3A+token+%28Vercel%E6%8E%A8%E5%A5%A8%29&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> **エンドポイント:** `https://your-app.vercel.app/api/mcp`
 > **LP:** [daisukehori.github.io/msgraph-mcp-server](https://daisukehori.github.io/msgraph-mcp-server/)
 
-Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。メール送信、予定作成、ファイル管理、SharePoint リスト操作 — すべて自然言語で AI エージェントから実行可能。
+Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。すべてのツールは `/me/` エンドポイントを使い、**操作者本人のデータ**にアクセスします。
 
-## 2 つの使い方
+---
 
-### 🌐 Vercel にデプロイして使う（推奨）
+## 重要: 「本人として」操作する
 
-上の「Deploy with Vercel」ボタンをワンクリック。デプロイ後、MCP クライアントから接続するだけ。
+このサーバーは**本人として**自分のメール・予定・ファイル・Teams を操作します。
+「謎の管理者アプリ」としてではありません。
 
-```
-「受信トレイの未読メール一覧を教えて」
-「明日 14:00 に営業会議を作成して」
-「Teams の #general チャネルに進捗報告を送って」
-「OneDrive の /Documents/報告書.xlsx をダウンロードして」
-「SharePoint サイトのタスクリストに新しいアイテムを追加して」
-```
+| 認証モード | 誰として動く | `/me/` | 主な用途 |
+|:--|:--|:--|:--|
+| **`delegated`** (推奨) | **あなた本人** | ✅ | ローカル (Claude Desktop / Code) |
+| **`token`** | **あなた本人** | ✅ | Vercel (アクセストークンを渡す) |
+| `client_credentials` | 管理者アプリ | ❌ | 自動化 (/users/{id}/ が必要) |
 
-### 💻 ローカルで使う（stdio）
+---
 
-Claude Desktop / Claude Code からローカル実行。
+## クイックスタート: ローカルで本人として使う
+
+### ステップ 1: Azure AD にアプリを登録する（5分）
+
+1. **[Azure Portal](https://portal.azure.com) にサインイン**
+   - あなたの Microsoft 365 アカウントでサインインします
+
+2. **Microsoft Entra ID を開く**
+   - 左メニュー → 「Microsoft Entra ID」（旧 Azure Active Directory）
+
+3. **アプリを登録**
+   - 左メニュー → 「アプリの登録」→「＋ 新規登録」
+   - **名前**: `msgraph-mcp-server`（任意）
+   - **サポートされているアカウントの種類**: 「この組織ディレクトリのみに含まれるアカウント」
+   - **リダイレクト URI**: 空のまま
+   - 「登録」をクリック
+
+4. **2 つの値をメモ**
+   - 登録完了画面で以下をコピー:
+     - **アプリケーション (クライアント) ID** → `MICROSOFT_CLIENT_ID`
+     - **ディレクトリ (テナント) ID** → `MICROSOFT_TENANT_ID`
+
+5. **パブリッククライアントフローを有効化**
+   - 左メニュー → 「認証」
+   - 一番下の「詳細設定」セクション
+   - **「パブリック クライアント フローを許可する」を「はい」**に設定
+   - 「保存」
+
+6. **API アクセス許可を追加**
+   - 左メニュー → 「API のアクセス許可」
+   - 「＋ アクセス許可の追加」→「Microsoft Graph」→ **「委任されたアクセス許可」**
+   - 以下をすべて追加:
+
+   | カテゴリ | スコープ |
+   |:--|:--|
+   | User | `User.Read`, `User.ReadBasic.All` |
+   | Mail | `Mail.Read`, `Mail.ReadWrite`, `Mail.Send` |
+   | Calendar | `Calendars.Read`, `Calendars.ReadWrite` |
+   | Teams | `Team.ReadBasic.All`, `Channel.ReadBasic.All`, `ChannelMessage.Read.All`, `ChannelMessage.Send`, `Chat.Read`, `Chat.ReadWrite`, `ChatMessage.Read`, `ChatMessage.Send` |
+   | Files (OneDrive) | `Files.Read.All`, `Files.ReadWrite.All` |
+   | Sites (SharePoint) | `Sites.Read.All`, `Sites.ReadWrite.All` |
+   | その他 | `offline_access`（トークン自動更新用） |
+
+   - 管理者の場合: **「[組織名] に管理者の同意を与えます」** をクリック
+   - 管理者でない場合: テナント管理者に同意を依頼してください
+
+### ステップ 2: クローンして起動（2分）
 
 ```bash
 git clone https://github.com/DaisukeHori/msgraph-mcp-server.git
 cd msgraph-mcp-server
 npm install
-npx tsx lib/stdio.ts
 ```
 
-## アーキテクチャ
-
-```
-┌──────────────────────────────────────────┐
-│  Next.js App Router (Vercel)             │
-│  /api/mcp  → Streamable HTTP            │
-│  /api/sse  → SSE (後方互換)              │
-├──────────────────────────────────────────┤
-│  認証コンテキスト (AsyncLocalStorage)      │
-│  3 モード: graph_token / client_creds /  │
-│            api_key                       │
-├──────────────────────────────────────────┤
-│  MCP Tools (45 ツール)                    │
-│  Mail(8) / Calendar(5) / Teams(8) /     │
-│  OneDrive(9) / SharePoint(12) / User(3) │
-├──────────────────────────────────────────┤
-│  Microsoft Graph API Client              │
-│  graph.microsoft.com/v1.0               │
-└──────────────────────────────────────────┘
-```
-
-## セットアップ
-
-### ステップ 1: Azure AD アプリを作る
-
-1. [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** → **アプリの登録** → **新規登録**
-2. 名前: `msgraph-mcp-server`（任意）
-3. サポートされているアカウントの種類: **この組織ディレクトリのみ**
-4. **登録** をクリック
-5. **アプリケーション (クライアント) ID** をメモ → `MICROSOFT_CLIENT_ID`
-6. **ディレクトリ (テナント) ID** をメモ → `MICROSOFT_TENANT_ID`
-7. **証明書とシークレット** → **新しいクライアント シークレット** を作成 → `MICROSOFT_CLIENT_SECRET`
-
-### ステップ 2: API アクセス許可を付与
-
-**API のアクセス許可** → **アクセス許可の追加** → **Microsoft Graph** → **アプリケーションのアクセス許可**:
-
-```
-Mail.Read, Mail.ReadWrite, Mail.Send
-Calendars.Read, Calendars.ReadWrite
-Team.ReadBasic.All, Channel.ReadBasic.All
-ChannelMessage.Read.All
-Chat.Read.All
-Files.Read.All, Files.ReadWrite.All
-Sites.Read.All, Sites.ReadWrite.All
-User.Read.All
-```
-
-→ **[組織名] に管理者の同意を与えます** をクリック
-
-### ステップ 3: デプロイまたはローカル起動
-
-#### Vercel（推奨）
-
-上の **Deploy with Vercel** ボタンをクリック → 環境変数を入力 → デプロイ完了
-
-#### ローカル（stdio）
-
-```bash
-export AUTH_MODE=client_credentials
-export MICROSOFT_CLIENT_ID=your-client-id
-export MICROSOFT_CLIENT_SECRET=your-client-secret
-export MICROSOFT_TENANT_ID=your-tenant-id
-
-npx tsx lib/stdio.ts
-```
-
-### ステップ 4: MCP クライアントに接続
-
-#### Claude.ai Web（Vercel デプロイ後）
-
-設定 → 接続 → MCP サーバーを追加:
-```
-URL: https://your-app.vercel.app/api/mcp
-```
-
-#### Claude Desktop（ローカル）
+### ステップ 3: Claude Desktop に設定
 
 `claude_desktop_config.json`:
 ```json
@@ -121,34 +88,91 @@ URL: https://your-app.vercel.app/api/mcp
       "command": "npx",
       "args": ["tsx", "/path/to/msgraph-mcp-server/lib/stdio.ts"],
       "env": {
-        "AUTH_MODE": "client_credentials",
-        "MICROSOFT_CLIENT_ID": "your-client-id",
-        "MICROSOFT_CLIENT_SECRET": "your-client-secret",
-        "MICROSOFT_TENANT_ID": "your-tenant-id"
+        "AUTH_MODE": "delegated",
+        "MICROSOFT_CLIENT_ID": "ステップ1でメモしたクライアントID",
+        "MICROSOFT_TENANT_ID": "ステップ1でメモしたテナントID"
       }
     }
   }
 }
 ```
 
-#### Claude Code
+### ステップ 4: 初回認証
 
-```bash
-claude mcp add msgraph \
-  -e AUTH_MODE=client_credentials \
-  -e MICROSOFT_CLIENT_ID=your-client-id \
-  -e MICROSOFT_CLIENT_SECRET=your-client-secret \
-  -e MICROSOFT_TENANT_ID=your-tenant-id \
-  -- npx tsx /path/to/msgraph-mcp-server/lib/stdio.ts
+初めてツールを呼ぶと、ターミナルに以下が表示されます:
+
+```
+═══════════════════════════════════════════════════
+🔐 Microsoft アカウントへのサインインが必要です
+═══════════════════════════════════════════════════
+To sign in, use a web browser to open the page
+https://microsoft.com/devicelogin and enter the
+code XXXXXXXX to authenticate.
+═══════════════════════════════════════════════════
 ```
 
-## 認証モード
+1. ブラウザで https://microsoft.com/devicelogin を開く
+2. 表示されたコードを入力
+3. Microsoft アカウントでサインイン
+4. 権限を許可
 
-| モード | 用途 | トークン渡し方 |
-|:--|:--|:--|
-| `graph_token`（デフォルト） | ユーザーが自分のトークンを渡す | Bearer Token or `?token=` |
-| `client_credentials` | サーバー対サーバー認証 | 環境変数で Azure AD 設定 |
-| `api_key` | MCP サーバーへのアクセス制限 + client_credentials | Bearer Token or `?key=` |
+**これで完了です。** 以降はトークンが `~/.msgraph-mcp-token-cache.json` にキャッシュされ、自動的に更新されます。
+
+---
+
+## Vercel でリモートデプロイする場合
+
+### ステップ 1: デプロイ
+
+上の **Deploy with Vercel** ボタンをクリック → 環境変数:
+- `AUTH_MODE`: `token`
+
+### ステップ 2: アクセストークンを取得
+
+Vercel の場合、MCP クライアントから Bearer Token でアクセストークンを渡す必要があります。
+
+**トークン取得方法:**
+1. https://developer.microsoft.com/graph/graph-explorer にアクセス
+2. 「Sign in to Graph Explorer」でサインイン
+3. 左上の「Access token」タブからトークンをコピー
+
+### ステップ 3: MCP クライアントに設定
+
+Claude.ai Web:
+```
+URL: https://your-app.vercel.app/api/mcp
+ヘッダー: Authorization: Bearer <コピーしたトークン>
+```
+
+> ⚠️ Graph Explorer のトークンは約 1 時間で期限切れになります。
+> 本格運用には delegated モード（ローカル）が推奨です。
+
+---
+
+## アーキテクチャ
+
+```
+┌──────────────────────────────────────────┐
+│  Next.js App Router (Vercel)             │
+│  /api/mcp  → Streamable HTTP            │
+│  /api/sse  → SSE (後方互換)              │
+├──────────────────────────────────────────┤
+│  lib/stdio.ts (ローカル)                  │
+│  MSAL Device Code Flow → 本人認証        │
+├──────────────────────────────────────────┤
+│  認証コンテキスト (AsyncLocalStorage)      │
+│  delegated / token / client_credentials  │
+├──────────────────────────────────────────┤
+│  MCP Tools (45 ツール)                    │
+│  すべて /me/ エンドポイントを使用          │
+│  = 操作者本人のデータにアクセス           │
+├──────────────────────────────────────────┤
+│  Microsoft Graph API v1.0                │
+│  graph.microsoft.com                     │
+└──────────────────────────────────────────┘
+```
+
+---
 
 ## ツール一覧（45 ツール）
 
@@ -223,19 +247,11 @@ claude mcp add msgraph \
 
 | ツール | 操作 |
 |:--|:--|
-| `user_get_profile` | サインインユーザーのプロフィール |
+| `user_get_profile` | 本人のプロフィール取得（認証テスト兼用） |
 | `user_search_users` | 組織内ユーザー検索 |
-| `auth_status` | 認証モード・ステータス確認 |
+| `auth_status` | 認証ステータス確認 / ログアウト |
 
-## 技術スタック
-
-- **Next.js 15** App Router
-- **mcp-handler** (Streamable HTTP + SSE)
-- **@modelcontextprotocol/sdk** (MCP SDK)
-- **AsyncLocalStorage** (リクエストスコープ認証)
-- **Zod** (入力バリデーション)
-- **Microsoft Graph API v1.0**
-- **Vercel** / **stdio** デュアルトランスポート
+---
 
 ## ライセンス
 

@@ -266,11 +266,98 @@
 
 <section id="setup" class="sec">
   <div class="ctn">
-    <div class="sec-h"><h2>3 ステップで始める</h2><p>ゼロから Microsoft 365 フルアクセスまで、数分で完了。</p></div>
-    <div class="steps">
-      <div class="sc"><div class="sc-n">1</div><h3>Azure AD アプリ登録</h3><p>Azure Portal → Entra ID → アプリの登録。クライアント ID・シークレット・テナント ID を取得。API アクセス許可を付与。</p></div>
-      <div class="sc"><div class="sc-n">2</div><h3>Vercel にデプロイ</h3><p>上のボタンをクリック → 環境変数を入力 → デプロイ完了。ローカルなら <code>npx tsx lib/stdio.ts</code></p></div>
-      <div class="sc"><div class="sc-n">3</div><h3>MCP クライアントに接続</h3><p>Claude.ai / Claude Desktop / Claude Code から MCP サーバーの URL を設定。</p><code>https://your-app.vercel.app/api/mcp</code></div>
+    <div class="sec-h">
+      <h2>「本人として」操作する</h2>
+      <p>管理者アプリではなく、あなた自身のメール・予定・ファイルにアクセスします</p>
+    </div>
+
+    <!-- Auth mode explanation -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px">
+      <div class="dc" style="border-left:3px solid var(--brand)">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di1">🔐</div><span class="dc-name">delegated（推奨）</span></div><span class="dc-cnt">本人</span></div>
+        <p class="dc-desc">MSAL Device Code Flow で <strong>あなた本人</strong>としてサインイン。初回のみブラウザで認証、以降は自動リフレッシュ。<code>/me/</code> で自分のデータにアクセス。<br><strong>Claude Desktop / Claude Code 向け。</strong></p>
+      </div>
+      <div class="dc">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di6">🌐</div><span class="dc-name">token（Vercel向け）</span></div><span class="dc-cnt">本人</span></div>
+        <p class="dc-desc">Bearer Token で Microsoft Graph アクセストークンを直接渡す方式。Graph Explorer 等でトークンを取得して設定。<code>/me/</code> が使え、本人としてアクセス。<br><strong>Vercel デプロイ向け。</strong></p>
+      </div>
+    </div>
+
+    <div class="sec-h"><h2>セットアップ手順</h2><p>Azure アプリ登録 → クローン → Claude 設定 → サインイン</p></div>
+    <div class="steps" style="grid-template-columns:1fr">
+      <div class="sc">
+        <div class="sc-n">1</div>
+        <h3>Azure Portal でアプリを登録（5分）</h3>
+        <p>
+          ① <a href="https://portal.azure.com" target="_blank">Azure Portal</a> にサインイン<br>
+          ② 左メニュー →「<strong>Microsoft Entra ID</strong>」→「<strong>アプリの登録</strong>」→「＋ 新規登録」<br>
+          ③ 名前: <code>msgraph-mcp-server</code>（任意）/ アカウントの種類: 「この組織ディレクトリのみ」→ 登録<br>
+          ④ <strong>アプリケーション (クライアント) ID</strong> と <strong>ディレクトリ (テナント) ID</strong> をメモ<br>
+          ⑤ 左メニュー →「認証」→ 下部「<strong>パブリック クライアント フローを許可する</strong>」を <strong>「はい」</strong> → 保存<br>
+          ⑥ 左メニュー →「API のアクセス許可」→「＋ アクセス許可の追加」→「Microsoft Graph」→「<strong>委任されたアクセス許可</strong>」→ 以下をすべて追加:
+        </p>
+        <div class="tags" style="margin-top:8px">
+          <span class="tag">User.Read</span>
+          <span class="tag">User.ReadBasic.All</span>
+          <span class="tag">Mail.Read</span>
+          <span class="tag">Mail.ReadWrite</span>
+          <span class="tag">Mail.Send</span>
+          <span class="tag">Calendars.Read</span>
+          <span class="tag">Calendars.ReadWrite</span>
+          <span class="tag">Team.ReadBasic.All</span>
+          <span class="tag">Channel.ReadBasic.All</span>
+          <span class="tag">ChannelMessage.Read.All</span>
+          <span class="tag">ChannelMessage.Send</span>
+          <span class="tag">Chat.Read</span>
+          <span class="tag">Chat.ReadWrite</span>
+          <span class="tag">ChatMessage.Read</span>
+          <span class="tag">ChatMessage.Send</span>
+          <span class="tag">Files.Read.All</span>
+          <span class="tag">Files.ReadWrite.All</span>
+          <span class="tag">Sites.Read.All</span>
+          <span class="tag">Sites.ReadWrite.All</span>
+          <span class="tag">offline_access</span>
+        </div>
+        <p style="margin-top:8px">⑦ 管理者なら「<strong>[組織名] に管理者の同意を与えます</strong>」をクリック</p>
+      </div>
+
+      <div class="sc">
+        <div class="sc-n">2</div>
+        <h3>クローンして Claude Desktop に設定</h3>
+        <p>
+          <code>git clone https://github.com/DaisukeHori/msgraph-mcp-server.git && cd msgraph-mcp-server && npm install</code><br><br>
+          <code>claude_desktop_config.json</code> に以下を追加:
+        </p>
+        <div class="terminal" style="margin-top:12px;max-width:100%">
+          <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>claude_desktop_config.json</span></div>
+          <div class="t-body" style="font-size:12px;line-height:1.7">
+<span class="c">{</span>
+  <span class="o">"mcpServers"</span><span class="c">: {</span>
+    <span class="o">"msgraph"</span><span class="c">: {</span>
+      <span class="o">"command"</span>: <span class="gr">"npx"</span>,
+      <span class="o">"args"</span>: [<span class="gr">"tsx"</span>, <span class="gr">"/path/to/lib/stdio.ts"</span>],
+      <span class="o">"env"</span><span class="c">: {</span>
+        <span class="o">"AUTH_MODE"</span>: <span class="gr">"delegated"</span>,
+        <span class="o">"MICROSOFT_CLIENT_ID"</span>: <span class="gr">"your-id"</span>,
+        <span class="o">"MICROSOFT_TENANT_ID"</span>: <span class="gr">"your-id"</span>
+      <span class="c">}</span>
+    <span class="c">}</span>
+  <span class="c">}</span>
+<span class="c">}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sc">
+        <div class="sc-n">3</div>
+        <h3>初回認証（1回だけ）</h3>
+        <p>
+          ツールを初めて呼ぶと、ターミナルに <strong>コード</strong> が表示されます。<br>
+          ① ブラウザで <a href="https://microsoft.com/devicelogin" target="_blank">microsoft.com/devicelogin</a> を開く<br>
+          ② コードを入力 → Microsoft アカウントでサインイン → 権限を許可<br>
+          ③ <strong>完了！</strong> 以降はトークンが自動更新され、再認証は不要です。
+        </p>
+      </div>
     </div>
   </div>
 </section>
