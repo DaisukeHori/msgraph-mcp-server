@@ -337,11 +337,13 @@
         <div class="sc-n">2</div>
         <h3>Vercel にデプロイ（2分）</h3>
         <p>
-          上の「▲ Vercel にデプロイ」ボタンをクリック。<br>
-          <strong>Upstash Redis が自動でセットアップ</strong>されます（無料枠で十分）。<br><br>
-          環境変数 4 つを入力:<br>
+          上の「▲ Vercel にデプロイ」ボタンをクリック。<br><br>
+          ① <strong>New Project</strong> → リポジトリ名を確認して「Create」<br>
+          ② <strong>Add Integrations</strong> → Upstash の横の<strong>「Add」をクリック</strong>（Redis が自動作成されます。無料枠で十分）<br>
+          ③ <strong>Add Environment Variables</strong> → 環境変数 <strong>4 つだけ</strong>入力:<br>
           <code>ADMIN_SECRET</code> — 自分で決めた管理パスワード<br>
           <code>MICROSOFT_CLIENT_ID</code> / <code>MICROSOFT_CLIENT_SECRET</code> / <code>MICROSOFT_TENANT_ID</code> — ステップ 1 でメモした値<br>
+          ④「<strong>Deploy</strong>」をクリック → デプロイ完了を待つ
         </p>
       </div>
 

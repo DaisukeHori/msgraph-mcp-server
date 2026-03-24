@@ -89,9 +89,11 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 
 ### ステップ 2: Vercel にデプロイ（2分）
 
-上の **Deploy with Vercel** ボタンをクリック。Upstash Redis のセットアップが自動で促されます（無料枠で十分）。
+上の **Deploy with Vercel** ボタンをクリック。
 
-環境変数 4 つを入力:
+1. **New Project** 画面 → リポジトリ名を確認して「Create」
+2. **Add Integrations** 画面 → Upstash の横の **「Add」をクリック** → Redis データベースが自動作成されます（無料枠で十分）
+3. **Add Environment Variables** 画面 → 以下の4つを入力:
 
 | 変数 | 値 |
 |:--|:--|
@@ -99,6 +101,8 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 | `MICROSOFT_CLIENT_ID` | ステップ 1 でメモしたクライアント ID |
 | `MICROSOFT_CLIENT_SECRET` | ステップ 1 でメモしたシークレット |
 | `MICROSOFT_TENANT_ID` | ステップ 1 でメモしたテナント ID |
+
+4. 「Deploy」をクリック → デプロイ完了を待つ
 
 ### ステップ 3: リダイレクト URI を更新
 
