@@ -9,9 +9,10 @@ import {
   graphDownloadFile,
   truncateResponse,
   handleToolError,
-} from "../services/graph-client.js";
-import { DriveItem, Drive, GraphPagedResponse } from "../types.js";
-import { DEFAULT_PAGE_SIZE } from "../constants.js";
+  GraphPagedResponse,
+} from "@/lib/msgraph/graph-client";
+import { DriveItem, Drive } from "@/lib/msgraph/types";
+import { DEFAULT_PAGE_SIZE } from "@/lib/config";
 
 export function registerOneDriveTools(server: McpServer): void {
   // -------------------------------------------------------

@@ -1,5 +1,9 @@
 node_modules/
+.next/
+out/
 dist/
-*.js.map
 .env
+.env.local
 .msgraph-mcp-token-cache.json
+*.tsbuildinfo
+.vercel

@@ -7,9 +7,10 @@ import {
   graphDelete,
   truncateResponse,
   handleToolError,
-} from "../services/graph-client.js";
-import { CalendarEvent, GraphPagedResponse } from "../types.js";
-import { DEFAULT_PAGE_SIZE } from "../constants.js";
+  GraphPagedResponse,
+} from "@/lib/msgraph/graph-client";
+import { CalendarEvent } from "@/lib/msgraph/types";
+import { DEFAULT_PAGE_SIZE } from "@/lib/config";
 
 export function registerCalendarTools(server: McpServer): void {
   // -------------------------------------------------------

@@ -181,17 +181,21 @@
         メール送信、予定作成、ファイル管理、リスト操作 — すべて自然言語で。
       </p>
       <div class="hero-actions">
-        <a href="https://github.com/DaisukeHori/msgraph-mcp-server" class="btn btn-brand" target="_blank">GitHub で見る</a>
-        <a href="https://www.npmjs.com/package/msgraph-mcp-server" class="btn btn-outline" target="_blank">npm パッケージ</a>
+        <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=AUTH_MODE%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID&envDescription=AUTH_MODE%3A+graph_token+or+client_credentials+or+api_key&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server" class="btn btn-brand" target="_blank">▲ Vercel にデプロイ</a>
+        <a href="https://github.com/DaisukeHori/msgraph-mcp-server" class="btn btn-outline" target="_blank">GitHub で見る</a>
       </div>
       <div class="terminal">
         <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>ターミナル</span></div>
         <div class="t-body">
-          <div><span class="c"># グローバルインストール</span></div>
-          <div><span class="gr">npm</span> install <span class="b">-g</span> <span class="o">msgraph-mcp-server</span></div>
+          <div><span class="c"># ローカルで使う場合</span></div>
+          <div><span class="gr">git</span> clone https://github.com/DaisukeHori/msgraph-mcp-server.git</div>
+          <div><span class="gr">cd</span> msgraph-mcp-server && <span class="gr">npm</span> install</div>
           <div>&nbsp;</div>
-          <div><span class="c"># Claude Code に追加</span></div>
-          <div><span class="gr">claude</span> mcp add <span class="o">msgraph</span> <span class="b">--</span> node dist/index.js</div>
+          <div><span class="c"># Claude Desktop / Claude Code から stdio で起動</span></div>
+          <div><span class="gr">npx</span> tsx <span class="o">lib/stdio.ts</span></div>
+          <div>&nbsp;</div>
+          <div><span class="c"># Vercel デプロイ後は MCP クライアントで接続</span></div>
+          <div><span class="c"># URL: https://your-app.vercel.app/api/mcp</span></div>
         </div>
       </div>
     </div>
@@ -262,12 +266,11 @@
 
 <section id="setup" class="sec">
   <div class="ctn">
-    <div class="sec-h"><h2>4 ステップで始める</h2><p>ゼロから Microsoft 365 フルアクセスまで、数分で完了。</p></div>
+    <div class="sec-h"><h2>3 ステップで始める</h2><p>ゼロから Microsoft 365 フルアクセスまで、数分で完了。</p></div>
     <div class="steps">
-      <div class="sc"><div class="sc-n">1</div><h3>Azure アプリ登録</h3><p>Azure Portal → Entra ID → アプリの登録。「パブリック クライアント フローを許可」を有効化。</p></div>
-      <div class="sc"><div class="sc-n">2</div><h3>API アクセス許可の付与</h3><p>Mail, Calendar, Teams, Files, Sites, User の委任アクセス許可を追加。管理者の同意を付与。</p></div>
-      <div class="sc"><div class="sc-n">3</div><h3>インストールとビルド</h3><p>リポジトリをクローンしてビルド。</p><code>npm install && npm run build</code></div>
-      <div class="sc"><div class="sc-n">4</div><h3>Claude に接続</h3><p>Claude Desktop / Claude Code にクライアント ID を設定して追加。</p><code>claude mcp add msgraph</code></div>
+      <div class="sc"><div class="sc-n">1</div><h3>Azure AD アプリ登録</h3><p>Azure Portal → Entra ID → アプリの登録。クライアント ID・シークレット・テナント ID を取得。API アクセス許可を付与。</p></div>
+      <div class="sc"><div class="sc-n">2</div><h3>Vercel にデプロイ</h3><p>上のボタンをクリック → 環境変数を入力 → デプロイ完了。ローカルなら <code>npx tsx lib/stdio.ts</code></p></div>
+      <div class="sc"><div class="sc-n">3</div><h3>MCP クライアントに接続</h3><p>Claude.ai / Claude Desktop / Claude Code から MCP サーバーの URL を設定。</p><code>https://your-app.vercel.app/api/mcp</code></div>
     </div>
   </div>
 </section>

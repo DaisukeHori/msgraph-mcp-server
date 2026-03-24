@@ -1,25 +1,4 @@
 // ============================================================
-// Common
-// ============================================================
-export interface GraphPagedResponse<T> {
-  "@odata.context"?: string;
-  "@odata.count"?: number;
-  "@odata.nextLink"?: string;
-  value: T[];
-}
-
-export interface GraphErrorResponse {
-  error: {
-    code: string;
-    message: string;
-    innerError?: {
-      "request-id"?: string;
-      date?: string;
-    };
-  };
-}
-
-// ============================================================
 // Mail / Exchange
 // ============================================================
 export interface MailMessage {
@@ -211,11 +190,3 @@ export interface SharePointColumn {
   required?: boolean;
 }
 
-// ============================================================
-// Auth
-// ============================================================
-export interface TokenCache {
-  accessToken: string;
-  expiresOn: Date;
-  refreshToken?: string;
-}

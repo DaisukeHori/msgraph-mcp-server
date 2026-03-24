@@ -7,7 +7,8 @@ import {
   graphDelete,
   truncateResponse,
   handleToolError,
-} from "../services/graph-client.js";
+  GraphPagedResponse,
+} from "@/lib/msgraph/graph-client";
 import {
   SharePointSite,
   SharePointList,
@@ -15,9 +16,8 @@ import {
   SharePointColumn,
   Drive,
   DriveItem,
-  GraphPagedResponse,
-} from "../types.js";
-import { DEFAULT_PAGE_SIZE } from "../constants.js";
+} from "@/lib/msgraph/types";
+import { DEFAULT_PAGE_SIZE } from "@/lib/config";
 
 export function registerSharePointTools(server: McpServer): void {
   // -------------------------------------------------------

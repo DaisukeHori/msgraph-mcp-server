@@ -1,7 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { graphGet, handleToolError } from "../services/graph-client.js";
-import { isAuthenticated, clearTokenCache } from "../services/auth.js";
+import { graphGet, handleToolError } from "@/lib/msgraph/graph-client";
+import { getAuthMode } from "@/lib/msgraph/auth-context";
 
 interface UserProfile {
   id: string;
@@ -21,11 +21,11 @@ export function registerUserTools(server: McpServer): void {
   server.registerTool(
     "user_get_profile",
     {
-      title: "Get User Profile",
-      description: `Get the signed-in user's profile information.
-Also triggers authentication if not yet authenticated (device code flow).
+      title: "ユーザープロフィール取得",
+      description: `サインイン中のユーザーのプロフィール情報を取得する。
+認証テストとしても使用可能。
 
-Returns: User profile with name, email, job title, etc.`,
+Returns: ユーザープロフィール（名前、メール、役職等）`,
       inputSchema: {},
       annotations: {
         readOnlyHint: true,
@@ -54,17 +54,17 @@ Returns: User profile with name, email, job title, etc.`,
   server.registerTool(
     "user_search_users",
     {
-      title: "Search Users",
-      description: `Search for users in the organization directory.
+      title: "ユーザー検索",
+      description: `組織ディレクトリのユーザーを検索する。
 
 Args:
-  - query (required): Search query (name, email, etc.)
-  - top: Max results (1-50, default 10)
+  - query (必須): 検索クエリ（名前、メール等）
+  - top: 最大件数 (1-50, デフォルト 10)
 
-Returns: List of matching users`,
+Returns: マッチしたユーザーの一覧`,
       inputSchema: {
-        query: z.string().min(1).describe("Search query"),
-        top: z.number().int().min(1).max(50).default(10).describe("Max results"),
+        query: z.string().min(1).describe("検索クエリ"),
+        top: z.number().int().min(1).max(50).default(10).describe("最大件数"),
       },
       annotations: {
         readOnlyHint: true,
@@ -98,45 +98,52 @@ Returns: List of matching users`,
   server.registerTool(
     "auth_status",
     {
-      title: "Authentication Status",
-      description: `Check authentication status and clear token cache if needed.
+      title: "認証ステータス",
+      description: `現在の認証モードとステータスを確認する。
 
-Args:
-  - action: "check" to check status, "logout" to clear tokens
-
-Returns: Authentication status`,
-      inputSchema: {
-        action: z.enum(["check", "logout"]).default("check").describe("Action"),
-      },
+Returns: 認証モード、設定状況`,
+      inputSchema: {},
       annotations: {
-        readOnlyHint: false,
+        readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
         openWorldHint: false,
       },
     },
-    async (params) => {
+    async () => {
       try {
-        if (params.action === "logout") {
-          await clearTokenCache();
-          return {
-            content: [{ type: "text", text: JSON.stringify({ authenticated: false, message: "Token cache cleared. You will need to re-authenticate on next request." }) }],
-          };
+        const mode = getAuthMode();
+        const status: Record<string, unknown> = {
+          authMode: mode,
+          description:
+            mode === "graph_token"
+              ? "Bearer Token で Microsoft Graph アクセストークンを直接渡すモード"
+              : mode === "client_credentials"
+                ? "Azure AD クライアント資格情報フローで自動取得するモード"
+                : "API キーで MCP サーバー認証 + クライアント資格情報フロー",
+        };
+
+        if (mode === "client_credentials" || mode === "api_key") {
+          status.clientIdConfigured = !!process.env.MICROSOFT_CLIENT_ID;
+          status.clientSecretConfigured = !!process.env.MICROSOFT_CLIENT_SECRET;
+          status.tenantIdConfigured = !!process.env.MICROSOFT_TENANT_ID;
+        }
+        if (mode === "api_key") {
+          status.mcpApiKeyConfigured = !!process.env.MCP_API_KEY;
         }
 
-        const authenticated = await isAuthenticated();
+        // テスト: /me を呼んでトークンが有効か確認
+        try {
+          const me = await graphGet<UserProfile>("/me", { $select: "displayName,mail" });
+          status.authenticated = true;
+          status.user = { displayName: me.displayName, mail: me.mail };
+        } catch (e) {
+          status.authenticated = false;
+          status.error = e instanceof Error ? e.message : String(e);
+        }
+
         return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify({
-                authenticated,
-                message: authenticated
-                  ? "Authenticated. Token cache exists."
-                  : "Not authenticated. Call user_get_profile or any tool to trigger authentication.",
-              }),
-            },
-          ],
+          content: [{ type: "text", text: JSON.stringify(status, null, 2) }],
         };
       } catch (error) {
         return { content: [{ type: "text", text: handleToolError(error) }] };
