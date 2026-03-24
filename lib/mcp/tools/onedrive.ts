@@ -508,4 +508,142 @@ Returns: List of matching items`,
       }
     }
   );
+
+  // -------------------------------------------------------
+  // onedrive_shared_with_me
+  // -------------------------------------------------------
+  server.registerTool(
+    "onedrive_shared_with_me",
+    {
+      title: "List Files Shared With Me",
+      description: `他のユーザーから共有されたファイルやフォルダの一覧を取得する。
+OneDrive for Business で他人が「共有」したアイテムが表示される。
+
+Args:
+  - top: 最大件数 (1-100, default 25)
+  - filter: OData filter
+
+Returns: 共有アイテム一覧（名前、共有者、ドライブID、リモートアイテムID）`,
+      inputSchema: {
+        top: z.number().int().min(1).max(100).default(25).describe("Max results"),
+        filter: z.string().optional().describe("OData filter"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params) => {
+      try {
+        const queryParams: Record<string, string | number> = {
+          $top: params.top,
+        };
+        if (params.filter) queryParams.$filter = params.filter;
+
+        const data = await graphGet<GraphPagedResponse<DriveItem>>(
+          "/me/drive/sharedWithMe",
+          queryParams
+        );
+
+        const items = data.value.map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.folder ? "folder" : "file",
+          size: item.size,
+          mimeType: item.file?.mimeType,
+          lastModifiedDateTime: item.lastModifiedDateTime,
+          webUrl: item.webUrl,
+          // 共有元の情報
+          sharedBy: item.shared
+            ? {
+                owner: item.shared.owner,
+                sharedBy: item.shared.sharedBy,
+                sharedDateTime: item.shared.sharedDateTime,
+                scope: item.shared.scope,
+              }
+            : undefined,
+          // リモートアイテム情報（他人のドライブ上のファイルへのアクセスに使う）
+          remoteItem: item.remoteItem
+            ? {
+                id: item.remoteItem.id,
+                name: item.remoteItem.name,
+                driveId: item.remoteItem.parentReference?.driveId,
+                webUrl: item.remoteItem.webUrl,
+                size: item.remoteItem.size,
+                file: item.remoteItem.file,
+                folder: item.remoteItem.folder,
+                lastModifiedBy: item.remoteItem.lastModifiedBy,
+              }
+            : undefined,
+        }));
+
+        return {
+          content: [{ type: "text", text: truncateResponse(JSON.stringify({ count: items.length, items }, null, 2)) }],
+        };
+      } catch (error) {
+        return { content: [{ type: "text", text: handleToolError(error) }] };
+      }
+    }
+  );
+
+  // -------------------------------------------------------
+  // onedrive_shared_item_browse
+  // -------------------------------------------------------
+  server.registerTool(
+    "onedrive_shared_item_browse",
+    {
+      title: "Browse Shared Drive/Folder",
+      description: `他人の OneDrive for Business のドライブやフォルダの中身を閲覧する。
+sharedWithMe で取得した remoteItem.driveId と remoteItem.id を使ってアクセス。
+
+Args:
+  - drive_id (必須): 共有元のドライブ ID（remoteItem.driveId）
+  - item_id: フォルダ ID（remoteItem.id）。省略時はドライブのルート
+  - top: 最大件数 (1-100, default 25)
+
+Returns: ファイル/フォルダ一覧`,
+      inputSchema: {
+        drive_id: z.string().min(1).describe("Shared drive ID (from remoteItem.driveId)"),
+        item_id: z.string().optional().describe("Folder item ID (from remoteItem.id)"),
+        top: z.number().int().min(1).max(100).default(25).describe("Max results"),
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params) => {
+      try {
+        const endpoint = params.item_id
+          ? `/drives/${params.drive_id}/items/${params.item_id}/children`
+          : `/drives/${params.drive_id}/root/children`;
+
+        const data = await graphGet<GraphPagedResponse<DriveItem>>(
+          endpoint,
+          { $top: params.top }
+        );
+
+        const items = data.value.map((item) => ({
+          id: item.id,
+          name: item.name,
+          type: item.folder ? "folder" : "file",
+          size: item.size,
+          mimeType: item.file?.mimeType,
+          lastModifiedDateTime: item.lastModifiedDateTime,
+          webUrl: item.webUrl,
+          lastModifiedBy: item.lastModifiedBy,
+        }));
+
+        return {
+          content: [{ type: "text", text: truncateResponse(JSON.stringify({ count: items.length, items }, null, 2)) }],
+        };
+      } catch (error) {
+        return { content: [{ type: "text", text: handleToolError(error) }] };
+      }
+    }
+  );
 }

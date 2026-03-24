@@ -126,6 +126,24 @@ export interface DriveItem {
     path?: string;
   };
   "@microsoft.graph.downloadUrl"?: string;
+  // 共有アイテム用
+  remoteItem?: {
+    id: string;
+    name?: string;
+    size?: number;
+    webUrl?: string;
+    file?: { mimeType: string };
+    folder?: { childCount: number };
+    parentReference?: { driveId: string; id: string; path?: string };
+    lastModifiedBy?: { user?: { displayName: string; email?: string } };
+  };
+  shared?: {
+    owner?: { user?: { displayName: string; email?: string } };
+    sharedBy?: { user?: { displayName: string; email?: string } };
+    sharedDateTime?: string;
+    scope?: string;
+  };
+  lastModifiedBy?: { user?: { displayName: string; id?: string; email?: string } };
 }
 
 export interface Drive {
