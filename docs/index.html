@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>msgraph-mcp-server — Microsoft Graph API for Claude / AI Agents</title>
+  <meta name="description" content="45 tools for Exchange, Teams, OneDrive, SharePoint CRUD via Model Context Protocol. Connect Claude and AI agents directly to Microsoft 365.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface-2: #1a1a24;
+      --border: #2a2a3a;
+      --border-glow: #3b82f640;
+      --text: #e4e4ef;
+      --text-dim: #8888a0;
+      --text-muted: #55556a;
+      --blue: #3b82f6;
+      --blue-bright: #60a5fa;
+      --blue-dim: #1e40af;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --orange: #f59e0b;
+      --purple: #a78bfa;
+      --red: #f87171;
+      --pink: #f472b6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* --- Grid background --- */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* --- Glow orbs --- */
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb.blue { width: 600px; height: 600px; background: var(--blue); top: -200px; right: -100px; }
+    .glow-orb.cyan { width: 400px; height: 400px; background: var(--cyan); bottom: 20%; left: -100px; opacity: 0.08; }
+    .glow-orb.purple { width: 500px; height: 500px; background: var(--purple); bottom: -200px; right: 20%; opacity: 0.1; }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* --- NAV --- */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--blue-bright);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--text-dim); font-weight: 400; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a {
+      font-size: 14px;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-badge {
+      background: var(--blue-dim);
+      color: var(--blue-bright);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* --- HERO --- */
+    .hero {
+      padding: 160px 0 100px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      font-family: 'JetBrains Mono', monospace;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    .hero-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+    .hero h1 {
+      font-size: clamp(48px, 7vw, 88px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -3px;
+      margin-bottom: 24px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--blue-bright), var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 20px;
+      color: var(--text-dim);
+      max-width: 640px;
+      margin: 0 auto 48px;
+      font-weight: 300;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--blue);
+      color: white;
+      box-shadow: 0 0 30px var(--blue-dim);
+    }
+    .btn-primary:hover { background: var(--blue-bright); transform: translateY(-2px); box-shadow: 0 0 40px rgba(59,130,246,0.4); }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--blue); background: var(--surface-2); }
+
+    /* --- Install block --- */
+    .install-block {
+      margin: 64px auto 0;
+      max-width: 680px;
+      animation: fadeInUp 0.6s ease-out 0.4s both;
+    }
+    .install-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .install-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .install-dots { display: flex; gap: 6px; }
+    .install-dots span { width: 10px; height: 10px; border-radius: 50%; }
+    .install-dots span:nth-child(1) { background: #ff5f56; }
+    .install-dots span:nth-child(2) { background: #ffbd2e; }
+    .install-dots span:nth-child(3) { background: #27c93f; }
+    .install-code {
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 2;
+      overflow-x: auto;
+    }
+    .install-code .comment { color: var(--text-muted); }
+    .install-code .cmd { color: var(--green); }
+    .install-code .flag { color: var(--orange); }
+    .install-code .str { color: var(--cyan); }
+
+    /* --- STATS --- */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin: 100px 0;
+    }
+    .stat {
+      background: var(--surface);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      color: var(--blue-bright);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    /* --- DOMAINS / TOOLS --- */
+    .section-title {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .section-title h2 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 12px;
+    }
+    .section-title p { color: var(--text-dim); font-size: 18px; font-weight: 300; }
+
+    .domains {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 120px;
+    }
+    .domain-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .domain-card:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px -20px rgba(59,130,246,0.15);
+    }
+    .domain-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+    .domain-card.mail::before { background: linear-gradient(90deg, var(--blue), var(--cyan)); }
+    .domain-card.calendar::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+    .domain-card.teams::before { background: linear-gradient(90deg, var(--purple), var(--pink)); }
+    .domain-card.onedrive::before { background: linear-gradient(90deg, var(--blue-bright), var(--blue)); }
+    .domain-card.sharepoint::before { background: linear-gradient(90deg, var(--cyan), var(--green)); }
+    .domain-card.user::before { background: linear-gradient(90deg, var(--orange), var(--red)); }
+
+    .domain-icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+    .domain-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .domain-name {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .domain-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--blue-bright);
+      background: var(--blue-dim);
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .domain-desc {
+      color: var(--text-dim);
+      font-size: 14px;
+      margin-bottom: 20px;
+      font-weight: 300;
+    }
+    .tool-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tool-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      transition: all 0.2s;
+    }
+    .tool-tag:hover {
+      border-color: var(--blue);
+      color: var(--blue-bright);
+    }
+
+    /* --- ARCHITECTURE --- */
+    .arch-section { margin-bottom: 120px; }
+    .arch-flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin-top: 48px;
+    }
+    .arch-node {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px 32px;
+      text-align: center;
+      min-width: 180px;
+    }
+    .arch-node-icon { font-size: 36px; margin-bottom: 8px; }
+    .arch-node-label { font-weight: 600; font-size: 15px; }
+    .arch-node-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .arch-arrow {
+      font-size: 24px;
+      color: var(--text-muted);
+      padding: 0 16px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .arch-node.highlight {
+      border-color: var(--blue);
+      box-shadow: 0 0 30px rgba(59,130,246,0.15);
+    }
+
+    /* --- SETUP STEPS --- */
+    .setup { margin-bottom: 120px; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 48px;
+    }
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    .step-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--blue-dim);
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+    .step h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .step p { font-size: 14px; color: var(--text-dim); font-weight: 300; }
+    .step code {
+      display: inline-block;
+      background: var(--surface-2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--cyan);
+      margin-top: 8px;
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      text-align: center;
+    }
+    footer p { color: var(--text-muted); font-size: 14px; }
+    footer a { color: var(--blue-bright); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* --- Animations --- */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* --- Mobile --- */
+    @media (max-width: 768px) {
+      .hero h1 { letter-spacing: -1.5px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { gap: 12px; }
+      .arch-flow { flex-direction: column; }
+      .arch-arrow { transform: rotate(90deg); padding: 8px 0; }
+      .domains { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="glow-orb blue"></div>
+<div class="glow-orb cyan"></div>
+<div class="glow-orb purple"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <a href="#" class="nav-logo">msgraph-mcp-server <span>v1.0</span></a>
+    <div class="nav-links">
+      <a href="#tools">Tools</a>
+      <a href="#setup">Setup</a>
+      <a href="https://github.com/DaisukeHori/msgraph-mcp-server" target="_blank">GitHub</a>
+      <span class="nav-badge">45 tools</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      MCP Server &middot; MIT Licensed
+    </div>
+    <h1>
+      <span class="gradient">Microsoft 365</span><br>
+      for AI Agents
+    </h1>
+    <p class="hero-sub">
+      45 tools that give Claude and AI agents full CRUD access to
+      Exchange, Teams, OneDrive &amp; SharePoint via Microsoft Graph API.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/DaisukeHori/msgraph-mcp-server" class="btn btn-primary">
+        ⭐ View on GitHub
+      </a>
+      <a href="https://www.npmjs.com/package/msgraph-mcp-server" class="btn btn-ghost">
+        📦 npm install
+      </a>
+    </div>
+
+    <div class="install-block">
+      <div class="install-card">
+        <div class="install-header">
+          <div class="install-dots"><span></span><span></span><span></span></div>
+          terminal
+        </div>
+        <div class="install-code">
+          <div><span class="comment"># Install globally</span></div>
+          <div><span class="cmd">npm</span> install <span class="flag">-g</span> <span class="str">msgraph-mcp-server</span></div>
+          <div>&nbsp;</div>
+          <div><span class="comment"># Or add to Claude Code</span></div>
+          <div><span class="cmd">claude</span> mcp add <span class="str">msgraph</span> <span class="flag">--</span> node /path/to/dist/index.js</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="container">
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-number">45</div>
+      <div class="stat-label">MCP Tools</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">6</div>
+      <div class="stat-label">M365 Domains</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">3.1k</div>
+      <div class="stat-label">Lines of TypeScript</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">2</div>
+      <div class="stat-label">Transport Modes</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLS -->
+<section id="tools" class="container">
+  <div class="section-title">
+    <h2>Full CRUD, Every Service</h2>
+    <p>45 tools across 6 Microsoft 365 domains — read, write, update, delete.</p>
+  </div>
+
+  <div class="domains">
+    <!-- Mail -->
+    <div class="domain-card mail">
+      <div class="domain-icon">📧</div>
+      <div class="domain-header">
+        <span class="domain-name">Exchange / Mail</span>
+        <span class="domain-count">8 tools</span>
+      </div>
+      <p class="domain-desc">Full email management — search, read, send, reply, organize.</p>
+      <div class="tool-list">
+        <span class="tool-tag">mail_list_messages</span>
+        <span class="tool-tag">mail_get_message</span>
+        <span class="tool-tag">mail_send_message</span>
+        <span class="tool-tag">mail_reply_message</span>
+        <span class="tool-tag">mail_update_message</span>
+        <span class="tool-tag">mail_delete_message</span>
+        <span class="tool-tag">mail_move_message</span>
+        <span class="tool-tag">mail_list_folders</span>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="domain-card calendar">
+      <div class="domain-icon">📅</div>
+      <div class="domain-header">
+        <span class="domain-name">Calendar</span>
+        <span class="domain-count">5 tools</span>
+      </div>
+      <p class="domain-desc">Schedule management with online meeting support. Default timezone: Asia/Tokyo.</p>
+      <div class="tool-list">
+        <span class="tool-tag">calendar_list_events</span>
+        <span class="tool-tag">calendar_get_event</span>
+        <span class="tool-tag">calendar_create_event</span>
+        <span class="tool-tag">calendar_update_event</span>
+        <span class="tool-tag">calendar_delete_event</span>
+      </div>
+    </div>
+
+    <!-- Teams -->
+    <div class="domain-card teams">
+      <div class="domain-icon">💬</div>
+      <div class="domain-header">
+        <span class="domain-name">Teams</span>
+        <span class="domain-count">8 tools</span>
+      </div>
+      <p class="domain-desc">Team channels and 1:1/group chats — read messages, send, reply.</p>
+      <div class="tool-list">
+        <span class="tool-tag">teams_list_joined_teams</span>
+        <span class="tool-tag">teams_list_channels</span>
+        <span class="tool-tag">teams_list_channel_messages</span>
+        <span class="tool-tag">teams_send_channel_message</span>
+        <span class="tool-tag">teams_reply_to_channel_message</span>
+        <span class="tool-tag">teams_list_chats</span>
+        <span class="tool-tag">teams_list_chat_messages</span>
+        <span class="tool-tag">teams_send_chat_message</span>
+      </div>
+    </div>
+
+    <!-- OneDrive -->
+    <div class="domain-card onedrive">
+      <div class="domain-icon">☁️</div>
+      <div class="domain-header">
+        <span class="domain-name">OneDrive</span>
+        <span class="domain-count">9 tools</span>
+      </div>
+      <p class="domain-desc">Cloud file operations — browse, upload, download, move, search.</p>
+      <div class="tool-list">
+        <span class="tool-tag">onedrive_get_drive</span>
+        <span class="tool-tag">onedrive_list_items</span>
+        <span class="tool-tag">onedrive_get_item</span>
+        <span class="tool-tag">onedrive_download_file</span>
+        <span class="tool-tag">onedrive_upload_file</span>
+        <span class="tool-tag">onedrive_create_folder</span>
+        <span class="tool-tag">onedrive_delete_item</span>
+        <span class="tool-tag">onedrive_move_item</span>
+        <span class="tool-tag">onedrive_search</span>
+      </div>
+    </div>
+
+    <!-- SharePoint -->
+    <div class="domain-card sharepoint">
+      <div class="domain-icon">🏢</div>
+      <div class="domain-header">
+        <span class="domain-name">SharePoint</span>
+        <span class="domain-count">12 tools</span>
+      </div>
+      <p class="domain-desc">Sites, document libraries, lists — full schema-aware CRUD on list items.</p>
+      <div class="tool-list">
+        <span class="tool-tag">sharepoint_search_sites</span>
+        <span class="tool-tag">sharepoint_get_site</span>
+        <span class="tool-tag">sharepoint_list_drives</span>
+        <span class="tool-tag">sharepoint_list_drive_items</span>
+        <span class="tool-tag">sharepoint_get_lists</span>
+        <span class="tool-tag">sharepoint_get_list_columns</span>
+        <span class="tool-tag">sharepoint_get_list_items</span>
+        <span class="tool-tag">sharepoint_get_list_item</span>
+        <span class="tool-tag">sharepoint_create_list_item</span>
+        <span class="tool-tag">sharepoint_update_list_item</span>
+        <span class="tool-tag">sharepoint_delete_list_item</span>
+        <span class="tool-tag">sharepoint_create_list</span>
+      </div>
+    </div>
+
+    <!-- User -->
+    <div class="domain-card user">
+      <div class="domain-icon">👤</div>
+      <div class="domain-header">
+        <span class="domain-name">User / Auth</span>
+        <span class="domain-count">3 tools</span>
+      </div>
+      <p class="domain-desc">Profile, directory search, auth management via MSAL Device Code Flow.</p>
+      <div class="tool-list">
+        <span class="tool-tag">user_get_profile</span>
+        <span class="tool-tag">user_search_users</span>
+        <span class="tool-tag">auth_status</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section class="container arch-section">
+  <div class="section-title">
+    <h2>How It Works</h2>
+    <p>stdio or HTTP transport → MSAL auth → Microsoft Graph API</p>
+  </div>
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="arch-node-icon">🤖</div>
+      <div class="arch-node-label">Claude / AI Agent</div>
+      <div class="arch-node-sub">MCP Client</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node highlight">
+      <div class="arch-node-icon">⚡</div>
+      <div class="arch-node-label">msgraph-mcp-server</div>
+      <div class="arch-node-sub">stdio / HTTP</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">🔐</div>
+      <div class="arch-node-label">MSAL Auth</div>
+      <div class="arch-node-sub">Device Code Flow</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="arch-node-icon">☁️</div>
+      <div class="arch-node-label">Microsoft Graph</div>
+      <div class="arch-node-sub">graph.microsoft.com</div>
+    </div>
+  </div>
+</section>
+
+<!-- SETUP -->
+<section id="setup" class="container setup">
+  <div class="section-title">
+    <h2>Get Started in 4 Steps</h2>
+    <p>From zero to full M365 access in minutes.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-number">01</div>
+      <h3>Register Azure App</h3>
+      <p>Create an app in Azure Portal → Entra ID → App registrations. Enable "Allow public client flows".</p>
+    </div>
+    <div class="step">
+      <div class="step-number">02</div>
+      <h3>Grant API Permissions</h3>
+      <p>Add delegated permissions for Mail, Calendar, Teams, Files, Sites, and User. Grant admin consent.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">03</div>
+      <h3>Install &amp; Build</h3>
+      <p>Clone, install, build.</p>
+      <code>npm install && npm run build</code>
+    </div>
+    <div class="step">
+      <div class="step-number">04</div>
+      <h3>Connect to Claude</h3>
+      <p>Add to Claude Desktop or Claude Code with your Client ID.</p>
+      <code>claude mcp add msgraph</code>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>
+      Built by <a href="https://github.com/DaisukeHori">Daisuke Hori</a> &middot;
+      <a href="https://github.com/DaisukeHori/msgraph-mcp-server">GitHub</a> &middot;
+      MIT License &middot;
+      Powered by <a href="https://modelcontextprotocol.io/">Model Context Protocol</a>
+    </p>
+  </div>
+</footer>
+
+</body>
+</html>

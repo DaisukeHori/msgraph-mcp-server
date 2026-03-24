@@ -1,27 +1,55 @@
 {
   "name": "msgraph-mcp-server",
   "version": "1.0.0",
-  "description": "Microsoft Graph API MCP Server - Exchange, Teams, OneDrive, SharePoint CRUD operations",
+  "description": "Microsoft Graph API MCP Server — 45 tools for Exchange, Teams, OneDrive, SharePoint CRUD via Model Context Protocol",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "msgraph-mcp-server": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "mcp",
+    "mcp-server",
+    "model-context-protocol",
     "microsoft-graph",
+    "microsoft-365",
     "exchange",
+    "outlook",
     "teams",
     "onedrive",
-    "sharepoint"
+    "sharepoint",
+    "claude",
+    "anthropic",
+    "ai",
+    "llm"
   ],
-  "author": "DaisukeHori",
+  "author": {
+    "name": "Daisuke Hori",
+    "url": "https://github.com/DaisukeHori"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DaisukeHori/msgraph-mcp-server.git"
+  },
+  "homepage": "https://daisukehori.github.io/msgraph-mcp-server/",
+  "bugs": {
+    "url": "https://github.com/DaisukeHori/msgraph-mcp-server/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "express": "^5.1.0",

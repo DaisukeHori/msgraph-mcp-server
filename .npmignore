@@ -1,0 +1,10 @@
+src/
+docs/
+.github/
+tsconfig.json
+.gitignore
+.env
+.msgraph-mcp-token-cache.json
+node_modules/
+*.ts
+!dist/**/*.d.ts
