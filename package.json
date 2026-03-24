@@ -43,6 +43,7 @@
   "dependencies": {
     "@azure/msal-node": "^5.1.1",
     "@modelcontextprotocol/sdk": "^1.25.2",
+    "@upstash/redis": "^1.37.0",
     "mcp-handler": "^1.0.7",
     "next": "^15",
     "react": "^19",

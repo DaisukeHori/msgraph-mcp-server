@@ -1,7 +1,6 @@
 export const metadata = {
-  title: "msgraph-mcp-server",
-  description:
-    "Microsoft Graph API MCP Server — Exchange・Teams・OneDrive・SharePoint の 45 ツール",
+  title: "msgraph-mcp-server — 管理パネル",
+  description: "Microsoft Graph API MCP Server — Exchange・Teams・OneDrive・SharePoint の 45 ツール",
 };
 
 export default function RootLayout({
@@ -11,7 +10,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body style={{ margin: 0 }}>{children}</body>
     </html>
   );
 }

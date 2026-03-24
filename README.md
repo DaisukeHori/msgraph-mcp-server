@@ -2,274 +2,154 @@
 
 **本人として Microsoft 365 を AI エージェントから操作する MCP サーバー**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=AUTH_MODE&envDescription=AUTH_MODE%3A+token+%28Vercel%E6%8E%A8%E5%A5%A8%29&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=ADMIN_SECRET%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID%2CTOKEN_ENCRYPTION_KEY&envDescription=ADMIN_SECRET%3A+%2Fauth%E7%AE%A1%E7%90%86%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89+%7C+MICROSOFT_CLIENT_ID%2FSECRET%2FTENANT_ID%3A+Azure+AD%E3%82%A2%E3%83%97%E3%83%AA+%7C+TOKEN_ENCRYPTION_KEY%3A+node+-e+%22console.log%28require%28%22crypto%22%29.randomBytes%2832%29.toString%28%22hex%22%29%29%22&envLink=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server%23%E3%82%B9%E3%83%86%E3%83%83%E3%83%97-1-azure-ad-%E3%81%AB%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E7%99%BB%E9%8C%B2%E3%81%99%E3%82%8B5%E5%88%86&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17&skippable-integrations=1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **LP:** [daisukehori.github.io/msgraph-mcp-server](https://daisukehori.github.io/msgraph-mcp-server/)
 
-Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。すべてのツールは `/me/` エンドポイントを使い、**操作者本人のデータ**にアクセスします。
+Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
+すべて `/me/` エンドポイントを使い、**操作者本人のデータ**にアクセスします。
 
 ---
 
-## 重要: 「本人として」操作する
+## なぜこれが必要か
 
-このサーバーは**本人として**自分のメール・予定・ファイル・Teams を操作します。
-「謎の管理者アプリ」としてではありません。
-
-| 認証モード | 誰として動く | `/me/` | 主な用途 |
-|:--|:--|:--|:--|
-| **`delegated`** (推奨) | **あなた本人** | ✅ | ローカル (Claude Desktop / Code) |
-| **`token`** | **あなた本人** | ✅ | Vercel (アクセストークンを渡す) |
-| `client_credentials` | 管理者アプリ | ❌ | 自動化 (/users/{id}/ が必要) |
-
----
-
-## クイックスタート: ローカルで本人として使う
-
-### ステップ 1: Azure AD にアプリを登録する（5分）
-
-1. **[Azure Portal](https://portal.azure.com) にサインイン**
-   - あなたの Microsoft 365 アカウントでサインインします
-
-2. **Microsoft Entra ID を開く**
-   - 左メニュー → 「Microsoft Entra ID」（旧 Azure Active Directory）
-
-3. **アプリを登録**
-   - 左メニュー → 「アプリの登録」→「＋ 新規登録」
-   - **名前**: `msgraph-mcp-server`（任意）
-   - **サポートされているアカウントの種類**: 「この組織ディレクトリのみに含まれるアカウント」
-   - **リダイレクト URI**: 空のまま
-   - 「登録」をクリック
-
-4. **2 つの値をメモ**
-   - 登録完了画面で以下をコピー:
-     - **アプリケーション (クライアント) ID** → `MICROSOFT_CLIENT_ID`
-     - **ディレクトリ (テナント) ID** → `MICROSOFT_TENANT_ID`
-
-5. **パブリッククライアントフローを有効化**
-   - 左メニュー → 「認証」
-   - 一番下の「詳細設定」セクション
-   - **「パブリック クライアント フローを許可する」を「はい」**に設定
-   - 「保存」
-
-6. **API アクセス許可を追加**
-   - 左メニュー → 「API のアクセス許可」
-   - 「＋ アクセス許可の追加」→「Microsoft Graph」→ **「委任されたアクセス許可」**
-   - 以下をすべて追加:
-
-   | カテゴリ | スコープ |
-   |:--|:--|
-   | User | `User.Read`, `User.ReadBasic.All` |
-   | Mail | `Mail.Read`, `Mail.ReadWrite`, `Mail.Send` |
-   | Calendar | `Calendars.Read`, `Calendars.ReadWrite` |
-   | Teams | `Team.ReadBasic.All`, `Channel.ReadBasic.All`, `ChannelMessage.Read.All`, `ChannelMessage.Send`, `Chat.Read`, `Chat.ReadWrite`, `ChatMessage.Read`, `ChatMessage.Send` |
-   | Files (OneDrive) | `Files.Read.All`, `Files.ReadWrite.All` |
-   | Sites (SharePoint) | `Sites.Read.All`, `Sites.ReadWrite.All` |
-   | その他 | `offline_access`（トークン自動更新用） |
-
-   - 管理者の場合: **「[組織名] に管理者の同意を与えます」** をクリック
-   - 管理者でない場合: テナント管理者に同意を依頼してください
-
-### ステップ 2: クローンして起動（2分）
-
-```bash
-git clone https://github.com/DaisukeHori/msgraph-mcp-server.git
-cd msgraph-mcp-server
-npm install
-```
-
-### ステップ 3: 事前認証（ターミナルで 1 回だけ）
-
-⚠️ **この手順が重要です。** Claude Desktop は MCP サーバーをバックグラウンドで起動するため、
-認証画面が表示されません。**先にターミナルで認証を済ませる**必要があります。
-
-```bash
-cd msgraph-mcp-server
-
-MICROSOFT_CLIENT_ID=ステップ1のクライアントID \
-MICROSOFT_TENANT_ID=ステップ1のテナントID \
-npx tsx lib/auth-setup.ts
-```
-
-以下の手順が表示されます:
-
-```
-┌─────────────────────────────────────────────────┐
-│                                                 │
-│  1. ブラウザで以下の URL を開く:                │
-│     https://microsoft.com/devicelogin           │
-│                                                 │
-│  2. コードを入力: ABCD1234                      │
-│                                                 │
-│  3. Microsoft アカウントでサインイン             │
-│                                                 │
-│  4. 権限を許可                                  │
-│                                                 │
-└─────────────────────────────────────────────────┘
-```
-
-1. ブラウザで https://microsoft.com/devicelogin を開く
-2. 表示されたコードを入力
-3. あなたの Microsoft アカウントでサインイン
-4. 権限を許可
-5. ターミナルに「✅ 認証成功！」と表示されれば完了
-
-トークンは `~/.msgraph-mcp-token-cache.json` にキャッシュされ、自動的に更新されます。
-**通常この手順は 1 回だけ**で、以降は Claude Desktop が自動的にキャッシュを使います。
-
-### ステップ 4: Claude Desktop に設定
-
-`claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "msgraph": {
-      "command": "npx",
-      "args": ["tsx", "/path/to/msgraph-mcp-server/lib/stdio.ts"],
-      "env": {
-        "AUTH_MODE": "delegated",
-        "MICROSOFT_CLIENT_ID": "ステップ1でメモしたクライアントID",
-        "MICROSOFT_TENANT_ID": "ステップ1でメモしたテナントID"
-      }
-    }
-  }
-}
-```
-
-Claude Desktop を再起動すれば、Microsoft 365 のツールが使えます。
-
----
-
-## Vercel でリモートデプロイする場合
-
-### ステップ 1: デプロイ
-
-上の **Deploy with Vercel** ボタンをクリック → 環境変数:
-- `AUTH_MODE`: `token`
-
-### ステップ 2: アクセストークンを取得
-
-Vercel の場合、MCP クライアントから Bearer Token でアクセストークンを渡す必要があります。
-
-**トークン取得方法:**
-1. https://developer.microsoft.com/graph/graph-explorer にアクセス
-2. 「Sign in to Graph Explorer」でサインイン
-3. 左上の「Access token」タブからトークンをコピー
-
-### ステップ 3: MCP クライアントに設定
-
-Claude.ai Web:
-```
-URL: https://your-app.vercel.app/api/mcp
-ヘッダー: Authorization: Bearer <コピーしたトークン>
-```
-
-> ⚠️ Graph Explorer のトークンは約 1 時間で期限切れになります。
-> 本格運用には delegated モード（ローカル）が推奨です。
+| 既存の方法 | この MCP サーバー |
+|:--|:--|
+| Graph Explorer のトークンは1時間で切れる | **refresh_token を Redis に暗号化保存 → 自動更新で実質無期限** |
+| client_credentials は管理者権限で全員のデータが見える | **委任アクセスで本人のデータだけ** |
+| 認証のたびにブラウザ操作が必要 | **初回1回だけ。以降は Cron が毎日トークン更新** |
 
 ---
 
 ## アーキテクチャ
 
 ```
-┌──────────────────────────────────────────┐
-│  Next.js App Router (Vercel)             │
-│  /api/mcp  → Streamable HTTP            │
-│  /api/sse  → SSE (後方互換)              │
-├──────────────────────────────────────────┤
-│  lib/stdio.ts (ローカル)                  │
-│  MSAL Device Code Flow → 本人認証        │
-├──────────────────────────────────────────┤
-│  認証コンテキスト (AsyncLocalStorage)      │
-│  delegated / token / client_credentials  │
-├──────────────────────────────────────────┤
-│  MCP Tools (45 ツール)                    │
-│  すべて /me/ エンドポイントを使用          │
-│  = 操作者本人のデータにアクセス           │
-├──────────────────────────────────────────┤
-│  Microsoft Graph API v1.0                │
-│  graph.microsoft.com                     │
-└──────────────────────────────────────────┘
+┌─── Vercel ──────────────────────────────────────┐
+│                                                  │
+│  /auth          管理画面（ADMIN_SECRET + OAuth）  │
+│    → Microsoft ログイン（初回のみ）               │
+│    → refresh_token を AES-256-GCM 暗号化         │
+│    → Upstash Redis に保存                        │
+│    → MCP API キーを自動発行                      │
+│                                                  │
+│  /api/mcp       MCP エンドポイント                │
+│    → API キー検証                                │
+│    → Redis から refresh_token → access_token     │
+│    → Graph API 呼び出し（/me/ = 本人として）      │
+│                                                  │
+│  /api/cron/keep-alive   毎日 03:00 UTC           │
+│    → refresh_token を自動更新                    │
+│    → 90日カウンターを毎日リセット = 実質無期限    │
+│                                                  │
+│  Upstash Redis (Vercel Marketplace / 自動追加)    │
+│    → 暗号化された refresh_token                   │
+│    → MCP API キー                                │
+│    → ブルートフォース対策カウンター               │
+│                                                  │
+└──────────────────────────────────────────────────┘
 ```
+
+## セキュリティ
+
+| 脅威 | 対策 |
+|:--|:--|
+| /auth への不正アクセス | ADMIN_SECRET（パスワード）+ Microsoft OAuth テナント制限の二重ロック |
+| ADMIN_SECRET 総当たり | 5回失敗で15分ロックアウト（Redis カウント） |
+| Redis の中身が見られた | refresh_token は AES-256-GCM 暗号化。暗号化キーは Vercel 環境変数のみ |
+| MCP API キー漏洩 | /auth から即座にローテーション可能（古いキー即無効化） |
+| refresh_token 期限切れ | 毎日 Cron で更新。90日問題を完全回避 |
+| Cron 不正呼び出し | CRON_SECRET ヘッダー検証（Vercel 自動生成） |
+
+---
+
+## クイックスタート（5ステップ）
+
+### ステップ 1: Azure AD にアプリを登録する（5分）
+
+1. [Azure Portal](https://portal.azure.com) にサインイン
+2. **Microsoft Entra ID** → **アプリの登録** → **＋ 新規登録**
+   - 名前: `msgraph-mcp-server`
+   - アカウントの種類: **この組織ディレクトリのみ**
+3. 登録完了画面で以下をメモ:
+   - **アプリケーション (クライアント) ID** → `MICROSOFT_CLIENT_ID`
+   - **ディレクトリ (テナント) ID** → `MICROSOFT_TENANT_ID`
+4. 左メニュー → **証明書とシークレット** → **新しいクライアント シークレット** → 値をメモ → `MICROSOFT_CLIENT_SECRET`
+5. 左メニュー → **API のアクセス許可** → **アクセス許可の追加** → **Microsoft Graph** → **委任されたアクセス許可**:
+
+   `User.Read` `User.ReadBasic.All` `Mail.Read` `Mail.ReadWrite` `Mail.Send` `Calendars.Read` `Calendars.ReadWrite` `Team.ReadBasic.All` `Channel.ReadBasic.All` `ChannelMessage.Read.All` `ChannelMessage.Send` `Chat.Read` `Chat.ReadWrite` `ChatMessage.Read` `ChatMessage.Send` `Files.Read.All` `Files.ReadWrite.All` `Sites.Read.All` `Sites.ReadWrite.All` `offline_access`
+
+6. 左メニュー → **認証** → 下部 **リダイレクト URI** → **Web** → `https://your-app.vercel.app/api/auth/callback` を追加
+7. **「[組織名] に管理者の同意を与えます」** をクリック
+
+### ステップ 2: Vercel にデプロイ（2分）
+
+上の **Deploy with Vercel** ボタンをクリック。Upstash Redis のセットアップが自動で促されます（無料枠で十分）。
+
+環境変数を入力:
+
+| 変数 | 値 |
+|:--|:--|
+| `ADMIN_SECRET` | 自分で決めた管理パスワード |
+| `MICROSOFT_CLIENT_ID` | ステップ 1 でメモしたクライアント ID |
+| `MICROSOFT_CLIENT_SECRET` | ステップ 1 でメモしたシークレット |
+| `MICROSOFT_TENANT_ID` | ステップ 1 でメモしたテナント ID |
+| `TOKEN_ENCRYPTION_KEY` | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` で生成 |
+
+### ステップ 3: リダイレクト URI を更新
+
+デプロイ完了後、Vercel の URL が確定したら Azure Portal に戻って:
+1. アプリの **認証** → **リダイレクト URI** に `https://your-app.vercel.app/api/auth/callback` を追加
+
+### ステップ 4: /auth で認証（1分）
+
+1. `https://your-app.vercel.app/auth` にアクセス
+2. ADMIN_SECRET（管理パスワード）を入力
+3. 「Microsoft でログイン」→ サインイン → 権限許可
+4. **MCP API キーが画面に表示される** → コピーして保存
+
+### ステップ 5: MCP クライアントに接続して使い始める
+
+Claude.ai / Claude Desktop で MCP サーバーを追加:
+
+- URL: `https://your-app.vercel.app/api/mcp`
+- ヘッダー: `Authorization: Bearer <ステップ4のAPIキー>`
+
+**以降一切何もしなくていい。** Cron が毎日トークンを自動更新し続けます。
+
+---
+
+## /auth 管理画面
+
+| 機能 | 説明 |
+|:--|:--|
+| 初回セットアップ | Microsoft ログイン → API キー自動発行 |
+| ステータス確認 | ユーザー名、トークン最終更新日、最終 Cron 実行日時 |
+| API キー確認 | 末尾4文字のヒント表示 |
+| キー ローテーション | 「再発行」ボタン → 古いキー即無効化 → 新キーを表示 |
+| 再認証 | refresh_token 失効時に再ログイン |
 
 ---
 
 ## ツール一覧（45 ツール）
 
-### Exchange / メール（8 ツール）
+| カテゴリ | ツール数 | 主な操作 |
+|:--|:--|:--|
+| **Exchange / メール** | 8 | 一覧・取得・送信・返信・更新・削除・移動・フォルダ |
+| **カレンダー** | 5 | 一覧・取得・作成・更新・削除（Asia/Tokyo 既定） |
+| **Teams** | 8 | チーム/チャネル/チャット一覧・メッセージ取得/送信/返信 |
+| **OneDrive** | 9 | ドライブ情報・一覧/取得/DL/UL/フォルダ作成/削除/移動/検索 |
+| **SharePoint** | 12 | サイト検索/取得・ライブラリ・リスト/カラム/アイテム CRUD |
+| **ユーザー / 認証** | 3 | プロフィール・ユーザー検索・認証ステータス |
 
-| ツール | 操作 |
-|:--|:--|
-| `mail_list_messages` | メール一覧（KQL 検索対応） |
-| `mail_get_message` | メール詳細取得 |
-| `mail_send_message` | メール送信 |
-| `mail_reply_message` | 返信 / 全員に返信 |
-| `mail_update_message` | 既読/未読・重要度変更 |
-| `mail_delete_message` | 削除 |
-| `mail_move_message` | フォルダ移動 |
-| `mail_list_folders` | フォルダ一覧 |
+---
 
-### カレンダー（5 ツール）
+## 同じ作者のプロジェクト
 
-| ツール | 操作 |
-|:--|:--|
-| `calendar_list_events` | 予定一覧（日付範囲指定可） |
-| `calendar_get_event` | 予定詳細 |
-| `calendar_create_event` | 予定作成（オンライン会議対応、既定 Asia/Tokyo） |
-| `calendar_update_event` | 予定更新 |
-| `calendar_delete_event` | 予定削除 |
+### [HubSpot MA MCP Server](https://github.com/DaisukeHori/hubspot-ma-mcp)
 
-### Teams（8 ツール）
-
-| ツール | 操作 |
-|:--|:--|
-| `teams_list_joined_teams` | 参加チーム一覧 |
-| `teams_list_channels` | チャネル一覧 |
-| `teams_list_channel_messages` | チャネルメッセージ一覧 |
-| `teams_send_channel_message` | チャネルにメッセージ送信 |
-| `teams_reply_to_channel_message` | メッセージに返信 |
-| `teams_list_chats` | チャット一覧 |
-| `teams_list_chat_messages` | チャットメッセージ一覧 |
-| `teams_send_chat_message` | チャットにメッセージ送信 |
-
-### OneDrive（9 ツール）
-
-| ツール | 操作 |
-|:--|:--|
-| `onedrive_get_drive` | ドライブ情報/容量 |
-| `onedrive_list_items` | ファイル/フォルダ一覧 |
-| `onedrive_get_item` | アイテム詳細 |
-| `onedrive_download_file` | ファイルダウンロード |
-| `onedrive_upload_file` | ファイルアップロード（< 4MB） |
-| `onedrive_create_folder` | フォルダ作成 |
-| `onedrive_delete_item` | 削除（ゴミ箱へ） |
-| `onedrive_move_item` | 移動/リネーム |
-| `onedrive_search` | 検索 |
-
-### SharePoint（12 ツール）
-
-| ツール | 操作 |
-|:--|:--|
-| `sharepoint_search_sites` | サイト検索 |
-| `sharepoint_get_site` | サイト詳細 |
-| `sharepoint_list_drives` | ドキュメントライブラリ一覧 |
-| `sharepoint_list_drive_items` | ライブラリ内ファイル一覧 |
-| `sharepoint_get_lists` | リスト一覧 |
-| `sharepoint_get_list_columns` | リストカラム定義 |
-| `sharepoint_get_list_items` | リストアイテム取得 |
-| `sharepoint_get_list_item` | リストアイテム詳細 |
-| `sharepoint_create_list_item` | リストアイテム作成 |
-| `sharepoint_update_list_item` | リストアイテム更新 |
-| `sharepoint_delete_list_item` | リストアイテム削除 |
-| `sharepoint_create_list` | リスト作成 |
-
-### ユーザー / 認証（3 ツール）
-
-| ツール | 操作 |
-|:--|:--|
-| `user_get_profile` | 本人のプロフィール取得（認証テスト兼用） |
-| `user_search_users` | 組織内ユーザー検索 |
-| `auth_status` | 認証ステータス確認 / ログアウト |
+128 ツール + Knowledge Store + Claude Skill の 3 層構造。
+「来月セミナーやるからよろしく」で AI がキャンペーン〜ワークフローまで一貫実行。
 
 ---
 

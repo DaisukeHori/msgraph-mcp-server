@@ -1,12 +1,11 @@
 /**
  * Microsoft Graph API クライアント
  *
- * AsyncLocalStorage ベースの認証コンテキストからトークンを取得し、
- * Graph API へのリクエストを実行する。
+ * Redis の refresh_token → access_token で Graph API を呼ぶ。
  */
 
 import { GRAPH_BASE_URL, CHARACTER_LIMIT } from "@/lib/config";
-import { getGraphToken } from "./auth-context";
+import { getGraphTokenFromRedis } from "./auth-context";
 
 // ── 型定義 ──
 
@@ -58,7 +57,7 @@ export async function graphRequest<T>(
   options: RequestOptions = {}
 ): Promise<T> {
   const { method = "GET", body, headers = {}, queryParams } = options;
-  const token = await getGraphToken();
+  const token = await getGraphTokenFromRedis();
   const url = buildUrl(endpoint, queryParams);
 
   const fetchHeaders: Record<string, string> = {
@@ -74,7 +73,6 @@ export async function graphRequest<T>(
   }
 
   const response = await fetch(url, fetchOptions);
-
   if (response.status === 204) return undefined as T;
 
   const data = await response.json();
@@ -117,7 +115,7 @@ export async function graphUploadSmallFile<T>(
   content: Buffer | string,
   contentType = "application/octet-stream"
 ): Promise<T> {
-  const token = await getGraphToken();
+  const token = await getGraphTokenFromRedis();
   const url = `${GRAPH_BASE_URL}${endpoint}`;
 
   const response = await fetch(url, {
@@ -138,7 +136,7 @@ export async function graphUploadSmallFile<T>(
 export async function graphDownloadFile(
   endpoint: string
 ): Promise<{ content: string; contentType: string }> {
-  const token = await getGraphToken();
+  const token = await getGraphTokenFromRedis();
   const response = await fetch(`${GRAPH_BASE_URL}${endpoint}`, {
     headers: { Authorization: `Bearer ${token}` },
   });

@@ -181,21 +181,21 @@
         メール送信、予定作成、ファイル管理、リスト操作 — すべて自然言語で。
       </p>
       <div class="hero-actions">
-        <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=AUTH_MODE%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID&envDescription=AUTH_MODE%3A+graph_token+or+client_credentials+or+api_key&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server" class="btn btn-brand" target="_blank">▲ Vercel にデプロイ</a>
+        <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=ADMIN_SECRET%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID%2CTOKEN_ENCRYPTION_KEY&envDescription=ADMIN_SECRET%3A+%2Fauth%E7%AE%A1%E7%90%86%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89+%7C+MICROSOFT_CLIENT_ID%2FSECRET%2FTENANT_ID%3A+Azure+AD%E3%82%A2%E3%83%97%E3%83%AA+%7C+TOKEN_ENCRYPTION_KEY%3A+node+-e+%22console.log%28require%28%22crypto%22%29.randomBytes%2832%29.toString%28%22hex%22%29%29%22&envLink=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server%23%E3%82%B9%E3%83%86%E3%83%83%E3%83%97-1-azure-ad-%E3%81%AB%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E7%99%BB%E9%8C%B2%E3%81%99%E3%82%8B5%E5%88%86&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17&skippable-integrations=1" class="btn btn-brand" target="_blank">▲ Vercel にデプロイ</a>
         <a href="https://github.com/DaisukeHori/msgraph-mcp-server" class="btn btn-outline" target="_blank">GitHub で見る</a>
       </div>
       <div class="terminal">
-        <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>ターミナル</span></div>
+        <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>セットアップ（5分で完了）</span></div>
         <div class="t-body">
-          <div><span class="c"># ローカルで使う場合</span></div>
-          <div><span class="gr">git</span> clone https://github.com/DaisukeHori/msgraph-mcp-server.git</div>
-          <div><span class="gr">cd</span> msgraph-mcp-server && <span class="gr">npm</span> install</div>
+          <div><span class="c"># 1. Vercel にデプロイ（ボタンをポチ → Upstash Redis 自動追加）</span></div>
+          <div><span class="c"># 2. /auth にアクセスして Microsoft でログイン</span></div>
+          <div><span class="c"># 3. 表示された MCP API キーを Claude に設定</span></div>
           <div>&nbsp;</div>
-          <div><span class="c"># Claude Desktop / Claude Code から stdio で起動</span></div>
-          <div><span class="gr">npx</span> tsx <span class="o">lib/stdio.ts</span></div>
+          <div><span class="c"># MCP クライアント設定</span></div>
+          <div>URL: <span class="o">https://your-app.vercel.app/api/mcp</span></div>
+          <div>Bearer: <span class="gr">&lt;自動発行された API キー&gt;</span></div>
           <div>&nbsp;</div>
-          <div><span class="c"># Vercel デプロイ後は MCP クライアントで接続</span></div>
-          <div><span class="c"># URL: https://your-app.vercel.app/api/mcp</span></div>
+          <div><span class="c"># 以降は Cron が毎日トークンを自動更新 → 実質無期限</span></div>
         </div>
       </div>
     </div>
@@ -251,15 +251,15 @@
 
 <section class="sec" style="background:var(--surface-2)">
   <div class="ctn">
-    <div class="sec-h"><h2>アーキテクチャ</h2><p>stdio / HTTP トランスポート → MSAL 認証 → Microsoft Graph API</p></div>
+    <div class="sec-h"><h2>アーキテクチャ</h2><p>Vercel + Upstash Redis + Cron で完全自動運用</p></div>
     <div class="af">
-      <div class="an"><div class="an-i">🤖</div><div class="an-l">Claude / AI エージェント</div><div class="an-s">MCP クライアント</div></div>
+      <div class="an"><div class="an-i">🤖</div><div class="an-l">Claude / AI エージェント</div><div class="an-s">Bearer: MCP API キー</div></div>
       <div class="aa">→</div>
-      <div class="an act"><div class="an-i">⚡</div><div class="an-l">msgraph-mcp-server</div><div class="an-s">stdio / HTTP</div></div>
+      <div class="an act"><div class="an-i">⚡</div><div class="an-l">msgraph-mcp-server</div><div class="an-s">Vercel + Upstash Redis</div></div>
       <div class="aa">→</div>
-      <div class="an"><div class="an-i">🔐</div><div class="an-l">MSAL 認証</div><div class="an-s">Device Code Flow</div></div>
+      <div class="an"><div class="an-i">🔄</div><div class="an-l">refresh → access_token</div><div class="an-s">自動更新 (毎日 Cron)</div></div>
       <div class="aa">→</div>
-      <div class="an"><div class="an-i">☁️</div><div class="an-l">Microsoft Graph</div><div class="an-s">graph.microsoft.com</div></div>
+      <div class="an"><div class="an-i">☁️</div><div class="an-l">Microsoft Graph /me/</div><div class="an-s">本人としてアクセス</div></div>
     </div>
   </div>
 </section>
@@ -271,19 +271,23 @@
       <p>管理者アプリではなく、あなた自身のメール・予定・ファイルにアクセスします</p>
     </div>
 
-    <!-- Auth mode explanation -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px">
-      <div class="dc" style="border-left:3px solid var(--brand)">
-        <div class="dc-top"><div class="dc-in"><div class="dc-icon di1">🔐</div><span class="dc-name">delegated（推奨）</span></div><span class="dc-cnt">本人</span></div>
-        <p class="dc-desc">MSAL Device Code Flow で <strong>あなた本人</strong>としてサインイン。初回のみブラウザで認証、以降は自動リフレッシュ。<code>/me/</code> で自分のデータにアクセス。<br><strong>Claude Desktop / Claude Code 向け。</strong></p>
+    <!-- Auth architecture explanation -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:40px">
+      <div class="dc" style="border-top:3px solid var(--brand)">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di1">🔐</div><span class="dc-name">初回認証</span></div></div>
+        <p class="dc-desc">/auth ページで<strong>管理パスワード + Microsoft OAuth</strong>の二重ロック。refresh_token を AES-256-GCM 暗号化して Redis に保存。</p>
       </div>
-      <div class="dc">
-        <div class="dc-top"><div class="dc-in"><div class="dc-icon di6">🌐</div><span class="dc-name">token（Vercel向け）</span></div><span class="dc-cnt">本人</span></div>
-        <p class="dc-desc">Bearer Token で Microsoft Graph アクセストークンを直接渡す方式。Graph Explorer 等でトークンを取得して設定。<code>/me/</code> が使え、本人としてアクセス。<br><strong>Vercel デプロイ向け。</strong></p>
+      <div class="dc" style="border-top:3px solid var(--success)">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di2">🔑</div><span class="dc-name">MCP API キー</span></div></div>
+        <p class="dc-desc">初回認証時に<strong>64文字の API キーを自動発行</strong>。MCP クライアントの Bearer Token に設定するだけ。ローテーションも /auth から即座に可能。</p>
+      </div>
+      <div class="dc" style="border-top:3px solid #7FBA00">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di2">⏰</div><span class="dc-name">毎日 Cron</span></div></div>
+        <p class="dc-desc">Vercel Cron Job が<strong>毎日 03:00 UTC</strong>に refresh_token を自動更新。90日カウンターが毎日リセットされ<strong>実質無期限</strong>で動作。</p>
       </div>
     </div>
 
-    <div class="sec-h"><h2>セットアップ手順</h2><p>Azure アプリ登録 → クローン → Claude 設定 → サインイン</p></div>
+    <div class="sec-h"><h2>セットアップ手順</h2><p>Azure アプリ登録 → Vercel デプロイ → /auth でログイン → MCP 接続</p></div>
     <div class="steps" style="grid-template-columns:1fr">
       <div class="sc">
         <div class="sc-n">1</div>
@@ -291,10 +295,10 @@
         <p>
           ① <a href="https://portal.azure.com" target="_blank">Azure Portal</a> にサインイン<br>
           ② 左メニュー →「<strong>Microsoft Entra ID</strong>」→「<strong>アプリの登録</strong>」→「＋ 新規登録」<br>
-          ③ 名前: <code>msgraph-mcp-server</code>（任意）/ アカウントの種類: 「この組織ディレクトリのみ」→ 登録<br>
-          ④ <strong>アプリケーション (クライアント) ID</strong> と <strong>ディレクトリ (テナント) ID</strong> をメモ<br>
-          ⑤ 左メニュー →「認証」→ 下部「<strong>パブリック クライアント フローを許可する</strong>」を <strong>「はい」</strong> → 保存<br>
-          ⑥ 左メニュー →「API のアクセス許可」→「＋ アクセス許可の追加」→「Microsoft Graph」→「<strong>委任されたアクセス許可</strong>」→ 以下をすべて追加:
+          ③ 名前: <code>msgraph-mcp-server</code> / アカウントの種類:「この組織ディレクトリのみ」→ 登録<br>
+          ④ <strong>クライアント ID</strong>・<strong>テナント ID</strong> をメモ<br>
+          ⑤ 左メニュー →「証明書とシークレット」→ <strong>クライアントシークレット</strong> を作成してメモ<br>
+          ⑥ 左メニュー →「API のアクセス許可」→「Microsoft Graph」→「<strong>委任されたアクセス許可</strong>」→ 以下をすべて追加:
         </p>
         <div class="tags" style="margin-top:8px">
           <span class="tag">User.Read</span>
@@ -318,62 +322,42 @@
           <span class="tag">Sites.ReadWrite.All</span>
           <span class="tag">offline_access</span>
         </div>
-        <p style="margin-top:8px">⑦ 管理者なら「<strong>[組織名] に管理者の同意を与えます</strong>」をクリック</p>
+        <p style="margin-top:8px">⑦「<strong>管理者の同意を与えます</strong>」をクリック<br>⑧「認証」→ リダイレクト URI に <code>https://your-app.vercel.app/api/auth/callback</code> を追加（デプロイ後に URL 確定してから）</p>
       </div>
 
       <div class="sc">
         <div class="sc-n">2</div>
-        <h3>事前認証（ターミナルで 1 回だけ）</h3>
+        <h3>Vercel にデプロイ（2分）</h3>
         <p>
-          ⚠️ <strong>Claude Desktop はバックグラウンドで MCP を起動するため、認証画面が出ません。</strong><br>
-          先にターミナルでこのコマンドを実行して、ブラウザで Microsoft にサインインしてください:
-        </p>
-        <div class="terminal" style="margin-top:12px;max-width:100%">
-          <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>ターミナル</span></div>
-          <div class="t-body" style="font-size:12px;line-height:1.7">
-<span class="c"># クローン & インストール</span>
-<span class="gr">git</span> clone https://github.com/DaisukeHori/msgraph-mcp-server.git
-<span class="gr">cd</span> msgraph-mcp-server && <span class="gr">npm</span> install
-
-<span class="c"># 事前認証（ブラウザが開きます）</span>
-MICROSOFT_CLIENT_ID=<span class="o">your-id</span> \
-MICROSOFT_TENANT_ID=<span class="o">your-id</span> \
-<span class="gr">npx</span> tsx <span class="o">lib/auth-setup.ts</span>
-          </div>
-        </div>
-        <p style="margin-top:8px">
-          ① ブラウザで <a href="https://microsoft.com/devicelogin" target="_blank">microsoft.com/devicelogin</a> を開く<br>
-          ② 表示されたコードを入力 → Microsoft アカウントでサインイン → 権限を許可<br>
-          ③ ターミナルに「✅ 認証成功！」と出れば完了（<strong>以降は自動更新</strong>）
+          上の「▲ Vercel にデプロイ」ボタンをクリック。<br>
+          <strong>Upstash Redis が自動でセットアップ</strong>されます（無料枠で十分）。<br><br>
+          環境変数 5 つを入力:<br>
+          <code>ADMIN_SECRET</code> — 自分で決めた管理パスワード<br>
+          <code>MICROSOFT_CLIENT_ID</code> / <code>MICROSOFT_CLIENT_SECRET</code> / <code>MICROSOFT_TENANT_ID</code> — ステップ 1 でメモした値<br>
+          <code>TOKEN_ENCRYPTION_KEY</code> — <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code> で生成
         </p>
       </div>
 
       <div class="sc">
         <div class="sc-n">3</div>
-        <h3>Claude Desktop に設定して使い始める</h3>
+        <h3>/auth で Microsoft ログイン（1分）</h3>
         <p>
-          <code>claude_desktop_config.json</code> に以下を追加して再起動。認証済みなので即動きます:
+          ① <code>https://your-app.vercel.app/auth</code> にアクセス<br>
+          ② 管理パスワード（ADMIN_SECRET）を入力<br>
+          ③「Microsoft でログイン」→ サインイン → 権限許可<br>
+          ④ <strong>MCP API キーが画面に表示される → コピーして保存</strong>
         </p>
-        <div class="terminal" style="margin-top:12px;max-width:100%">
-          <div class="t-bar"><span class="t-dot r"></span><span class="t-dot y"></span><span class="t-dot g"></span><span>claude_desktop_config.json</span></div>
-          <div class="t-body" style="font-size:12px;line-height:1.7">
-<span class="c">{</span>
-  <span class="o">"mcpServers"</span><span class="c">: {</span>
-    <span class="o">"msgraph"</span><span class="c">: {</span>
-      <span class="o">"command"</span>: <span class="gr">"npx"</span>,
-      <span class="o">"args"</span>: [<span class="gr">"tsx"</span>, <span class="gr">"/path/to/lib/stdio.ts"</span>],
-      <span class="o">"env"</span><span class="c">: {</span>
-        <span class="o">"AUTH_MODE"</span>: <span class="gr">"delegated"</span>,
-        <span class="o">"MICROSOFT_CLIENT_ID"</span>: <span class="gr">"your-id"</span>,
-        <span class="o">"MICROSOFT_TENANT_ID"</span>: <span class="gr">"your-id"</span>
-      <span class="c">}</span>
-    <span class="c">}</span>
-  <span class="c">}</span>
-<span class="c">}</span>
-          </div>
-        </div>
       </div>
 
+      <div class="sc">
+        <div class="sc-n">4</div>
+        <h3>MCP クライアントに接続して使い始める</h3>
+        <p>
+          Claude.ai / Claude Desktop で MCP サーバーを追加:<br>
+          URL: <code>https://your-app.vercel.app/api/mcp</code><br>
+          ヘッダー: <code>Authorization: Bearer &lt;ステップ3のAPIキー&gt;</code><br><br>
+          <strong>以降一切何もしなくていい。</strong>Cron が毎日トークンを自動更新し続けます。
+        </p>
       </div>
     </div>
   </div>

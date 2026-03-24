@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { graphGet, handleToolError } from "@/lib/msgraph/graph-client";
-import { getAuthMode, clearAuthCache } from "@/lib/msgraph/auth-context";
 
 interface UserProfile {
   id: string;
@@ -20,7 +19,6 @@ export function registerUserTools(server: McpServer): void {
     {
       title: "ユーザープロフィール取得",
       description: `サインイン中のユーザー（本人）のプロフィール情報を取得する。
-delegated モードでは初回呼び出し時に Device Code Flow 認証が発動する。
 
 Returns: ユーザープロフィール（名前、メール、役職等）`,
       inputSchema: {},
@@ -74,57 +72,31 @@ Returns: マッチしたユーザーの一覧`,
   server.registerTool(
     "auth_status",
     {
-      title: "認証ステータス確認・ログアウト",
-      description: `現在の認証モードとステータスを確認する。
-action="logout" でキャッシュをクリアして再認証を強制する。
+      title: "認証ステータス",
+      description: `現在の認証ステータスを確認する。/me にアクセスしてトークンの有効性をテスト。
 
-Args:
-  - action: "check" で確認、"logout" でキャッシュクリア
-
-Returns: 認証モード、設定状況、現在のユーザー`,
-      inputSchema: {
-        action: z.enum(["check", "logout"]).default("check").describe("check: 確認 / logout: 再認証"),
-      },
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+Returns: 認証状態、ユーザー情報`,
+      inputSchema: {},
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
-    async (params) => {
+    async () => {
       try {
-        if (params.action === "logout") {
-          await clearAuthCache();
-          return { content: [{ type: "text", text: JSON.stringify({
-            success: true,
-            message: "認証キャッシュをクリアしました。次のリクエストで再認証が必要になります。",
-          }, null, 2) }] };
-        }
-
-        const mode = getAuthMode();
-        const status: Record<string, unknown> = {
-          authMode: mode,
-          description: {
-            delegated: "本人として操作（MSAL Device Code Flow / ローカル向け）",
-            token: "本人として操作（Bearer Token 渡し / Vercel 向け）",
-            client_credentials: "管理者アプリとして操作（/me/ 使用不可）",
-          }[mode],
+        const profile = await graphGet<UserProfile>("/me", {
+          $select: "displayName,mail,userPrincipalName",
+        });
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              authenticated: true,
+              user: {
+                displayName: profile.displayName,
+                mail: profile.mail,
+                userPrincipalName: profile.userPrincipalName,
+              },
+            }, null, 2),
+          }],
         };
-
-        if (mode === "delegated" || mode === "client_credentials") {
-          status.clientIdConfigured = !!process.env.MICROSOFT_CLIENT_ID;
-          status.tenantIdConfigured = !!process.env.MICROSOFT_TENANT_ID;
-        }
-        if (mode === "client_credentials") {
-          status.clientSecretConfigured = !!process.env.MICROSOFT_CLIENT_SECRET;
-        }
-
-        try {
-          const me = await graphGet<UserProfile>("/me", { $select: "displayName,mail,userPrincipalName" });
-          status.authenticated = true;
-          status.user = { displayName: me.displayName, mail: me.mail, userPrincipalName: me.userPrincipalName };
-        } catch (e) {
-          status.authenticated = false;
-          status.error = e instanceof Error ? e.message : String(e);
-        }
-
-        return { content: [{ type: "text", text: JSON.stringify(status, null, 2) }] };
       } catch (error) {
         return { content: [{ type: "text", text: handleToolError(error) }] };
       }
