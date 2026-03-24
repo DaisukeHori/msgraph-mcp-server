@@ -215,6 +215,16 @@ export default function AuthPage() {
                   <button onClick={handleMicrosoftLogin} style={S.btnOutline}>再認証</button>
                   <button onClick={handleRotateKey} style={S.btnDanger} disabled={loading}>APIキーを再発行</button>
                 </div>
+                {newApiKey && (
+                  <div style={S.keyBox}>
+                    <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: 14 }}>🔑 MCP API キー（この画面でのみ表示されます）</p>
+                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                      <code style={S.keyCode}>{newApiKey}</code>
+                      <button onClick={() => { navigator.clipboard.writeText(newApiKey); setKeyCopied(true); setTimeout(() => setKeyCopied(false), 3000); }} style={S.btnCopy}>{keyCopied ? "✓ コピー済み" : "キーをコピー"}</button>
+                    </div>
+                    <p style={{ margin: "8px 0 0", fontSize: 12, color: "#616161" }}>ページを閉じると再表示できません（再発行は可能です）。</p>
+                  </div>
+                )}
                 {newApiKey && <McpGuide />}
               </div>
             ) : (
@@ -234,7 +244,7 @@ export default function AuthPage() {
                 <p style={{ margin: "0 0 8px", fontWeight: 600, fontSize: 14 }}>🔑 MCP API キー（この画面でのみ表示されます）</p>
                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                   <code style={S.keyCode}>{newApiKey}</code>
-                  <button onClick={() => { navigator.clipboard.writeText(newApiKey); setKeyCopied(true); setTimeout(() => setKeyCopied(false), 3000); }} style={S.btnCopy}>{keyCopied ? "✓ コピー済み" : "コピー"}</button>
+                  <button onClick={() => { navigator.clipboard.writeText(newApiKey); setKeyCopied(true); setTimeout(() => setKeyCopied(false), 3000); }} style={S.btnCopy}>{keyCopied ? "✓ コピー済み" : "キーをコピー"}</button>
                 </div>
                 <p style={{ margin: "8px 0 0", fontSize: 12, color: "#616161" }}>ページを閉じると再表示できません（再発行は可能です）。</p>
               </div>
