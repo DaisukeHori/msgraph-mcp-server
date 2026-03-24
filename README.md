@@ -92,7 +92,19 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 上の **Deploy with Vercel** ボタンをクリック。
 
 1. **New Project** 画面 → リポジトリ名を確認して「Create」
-2. **Add Integrations** 画面 → Upstash の横の **「Add」をクリック** → Upstash のログイン画面が開くので **「Continue with GitHub」** でサインイン → Upstash 連携画面で Project が自動選択されているのを確認 → Redis の **「Create new database...」** を選択 → データベース名はそのまま / リージョンは近い場所を選択 → **「Save」** をクリック
+2. **Add Integrations** 画面 → Upstash の横の **「Add」をクリック** → Upstash のログイン画面が開くので **「Continue with GitHub」** でサインイン → Upstash 連携画面で:
+   - Project が自動選択されているのを確認
+   - Redis の **「Create new database...」** を選択
+   - **Create Database** 画面:
+     - **Name**: `msgraph-mcp-server`（任意）
+     - **Primary Region**: `ap-northeast-1`（東京。日本から使うなら最寄り）
+     - **Read Regions**: 空のまま
+     - **Eviction**: オフのまま
+     - →「Next」
+   - **Select a Plan** 画面:
+     - **「Free」** を選択（256MB / 10GB 帯域。十分すぎます）
+     - →「Create」
+   - Vercel に戻ったら **「Save」** をクリック
 3. **Add Environment Variables** 画面 → 以下の4つを入力:
 
 | 変数 | 値 |
