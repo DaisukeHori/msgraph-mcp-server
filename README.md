@@ -92,7 +92,7 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 上の **Deploy with Vercel** ボタンをクリック。
 
 1. **New Project** 画面 → リポジトリ名を確認して「Create」
-2. **Add Integrations** 画面 → Upstash の横の **「Add」をクリック** → Redis データベースが自動作成されます（無料枠で十分）
+2. **Add Integrations** 画面 → Upstash の横の **「Add」をクリック** → Upstash のログイン画面が開くので **「Continue with GitHub」** でサインイン → Redis データベースが自動作成されます（無料枠で十分）
 3. **Add Environment Variables** 画面 → 以下の4つを入力:
 
 | 変数 | 値 |
