@@ -1,28 +1,38 @@
 /**
  * AES-256-GCM 暗号化/復号
  *
- * refresh_token を Redis に保存する際に使用。
- * 暗号化キー (TOKEN_ENCRYPTION_KEY) は Vercel 環境変数に保持し、
- * Redis には暗号文のみが保存される。
+ * 暗号化キーは MICROSOFT_CLIENT_SECRET + MICROSOFT_TENANT_ID から
+ * HKDF で自動導出される。ユーザーが別途キーを設定する必要はない。
+ *
+ * オプションで TOKEN_ENCRYPTION_KEY を明示指定すれば、そちらが優先される。
  */
 
-import { randomBytes, createCipheriv, createDecipheriv, createHash } from "crypto";
+import { randomBytes, createCipheriv, createDecipheriv, hkdfSync } from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
 
 function getKey(): Buffer {
-  const raw = process.env.TOKEN_ENCRYPTION_KEY;
-  if (!raw) {
+  // 優先: TOKEN_ENCRYPTION_KEY が明示設定されていればそれを使う
+  const explicit = process.env.TOKEN_ENCRYPTION_KEY;
+  if (explicit) {
+    return Buffer.from(hkdfSync("sha256", explicit, "msgraph-mcp", "encryption-key", 32));
+  }
+
+  // 自動導出: MICROSOFT_CLIENT_SECRET + TENANT_ID → HKDF → 32バイト鍵
+  const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
+  const tenantId = process.env.MICROSOFT_TENANT_ID;
+
+  if (!clientSecret || !tenantId) {
     throw new Error(
-      "TOKEN_ENCRYPTION_KEY 環境変数が設定されていません。\n" +
-        "以下のコマンドで生成してください:\n" +
-        "  node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
+      "暗号化キーを導出できません。\n" +
+        "MICROSOFT_CLIENT_SECRET と MICROSOFT_TENANT_ID を設定してください。"
     );
   }
-  // 任意長の文字列を SHA-256 で 32 バイトに正規化
-  return createHash("sha256").update(raw).digest();
+
+  return Buffer.from(
+    hkdfSync("sha256", clientSecret, tenantId, "msgraph-mcp-token-encryption", 32)
+  );
 }
 
 /**

@@ -10,7 +10,8 @@ process.env.ADMIN_SECRET = "test-admin-secret-123";
 process.env.MICROSOFT_CLIENT_ID = "test-client-id";
 process.env.MICROSOFT_CLIENT_SECRET = "test-client-secret";
 process.env.MICROSOFT_TENANT_ID = "test-tenant-id";
-process.env.TOKEN_ENCRYPTION_KEY = "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2";
+// TOKEN_ENCRYPTION_KEY は未設定 → HKDF で CLIENT_SECRET + TENANT_ID から自動導出
+delete process.env.TOKEN_ENCRYPTION_KEY;
 process.env.CRON_SECRET = "test-cron-secret";
 process.env.KV_REST_API_URL = "https://test.upstash.io";
 process.env.KV_REST_API_TOKEN = "test-redis-token";

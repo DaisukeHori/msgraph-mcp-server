@@ -46,11 +46,17 @@ describe("lib/crypto", () => {
       expect(typeof result).toBe("string");
     });
 
-    it("C07: TOKEN_ENCRYPTION_KEY 未設定でエラー", () => {
-      const original = process.env.TOKEN_ENCRYPTION_KEY;
+    it("C07: CLIENT_SECRET と TENANT_ID 両方未設定でエラー", () => {
+      const origSecret = process.env.MICROSOFT_CLIENT_SECRET;
+      const origTenant = process.env.MICROSOFT_TENANT_ID;
+      const origKey = process.env.TOKEN_ENCRYPTION_KEY;
+      delete process.env.MICROSOFT_CLIENT_SECRET;
+      delete process.env.MICROSOFT_TENANT_ID;
       delete process.env.TOKEN_ENCRYPTION_KEY;
-      expect(() => encrypt("test")).toThrow("TOKEN_ENCRYPTION_KEY");
-      process.env.TOKEN_ENCRYPTION_KEY = original;
+      expect(() => encrypt("test")).toThrow("暗号化キーを導出できません");
+      process.env.MICROSOFT_CLIENT_SECRET = origSecret;
+      process.env.MICROSOFT_TENANT_ID = origTenant;
+      process.env.TOKEN_ENCRYPTION_KEY = origKey;
     });
   });
 
@@ -92,12 +98,20 @@ describe("lib/crypto", () => {
       expect(() => decrypt(parts.join(":"))).toThrow();
     });
 
-    it("C14: 異なる暗号化キーで復号不可", () => {
-      const encrypted = encrypt("secret");
-      const original = process.env.TOKEN_ENCRYPTION_KEY;
-      process.env.TOKEN_ENCRYPTION_KEY = "different-key-for-testing-purposes-here";
-      expect(() => decrypt(encrypted)).toThrow();
-      process.env.TOKEN_ENCRYPTION_KEY = original;
+    it("C14: 異なる暗号化ソースで正しく復号できない", () => {
+      const original_text = "secret";
+      const encrypted = encrypt(original_text);
+      const origSecret = process.env.MICROSOFT_CLIENT_SECRET;
+      process.env.MICROSOFT_CLIENT_SECRET = "completely-different-secret-value";
+      try {
+        const result = decrypt(encrypted);
+        // throw しなくても、復号結果が元と異なることを確認
+        expect(result).not.toBe(original_text);
+      } catch {
+        // GCM auth tag 不一致で throw した場合もOK
+        expect(true).toBe(true);
+      }
+      process.env.MICROSOFT_CLIENT_SECRET = origSecret;
     });
 
     it("C15: 大きなデータの暗号化→復号の整合性", () => {

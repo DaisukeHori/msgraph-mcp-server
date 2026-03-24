@@ -2,7 +2,7 @@
 
 **本人として Microsoft 365 を AI エージェントから操作する MCP サーバー**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=ADMIN_SECRET%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID%2CTOKEN_ENCRYPTION_KEY&envDescription=ADMIN_SECRET%3A+%2Fauth%E7%AE%A1%E7%90%86%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89+%7C+MICROSOFT_CLIENT_ID%2FSECRET%2FTENANT_ID%3A+Azure+AD%E3%82%A2%E3%83%97%E3%83%AA+%7C+TOKEN_ENCRYPTION_KEY%3A+node+-e+%22console.log%28require%28%22crypto%22%29.randomBytes%2832%29.toString%28%22hex%22%29%29%22&envLink=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server%23%E3%82%B9%E3%83%86%E3%83%83%E3%83%97-1-azure-ad-%E3%81%AB%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E7%99%BB%E9%8C%B2%E3%81%99%E3%82%8B5%E5%88%86&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17&skippable-integrations=1)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server&env=ADMIN_SECRET%2CMICROSOFT_CLIENT_ID%2CMICROSOFT_CLIENT_SECRET%2CMICROSOFT_TENANT_ID&envDescription=ADMIN_SECRET%3A+%2Fauth%E7%AE%A1%E7%90%86%E3%83%91%E3%82%B9%E3%83%AF%E3%83%BC%E3%83%89+%7C+MICROSOFT_CLIENT_ID%2FSECRET%2FTENANT_ID%3A+Azure+AD%E3%82%A2%E3%83%97%E3%83%AA%EF%BC%88README%E3%81%AE%E3%82%B9%E3%83%86%E3%83%83%E3%83%971%E5%8F%82%E7%85%A7%EF%BC%89&envLink=https%3A%2F%2Fgithub.com%2FDaisukeHori%2Fmsgraph-mcp-server%23%E3%82%B9%E3%83%86%E3%83%83%E3%83%97-1-azure-ad-%E3%81%AB%E3%82%A2%E3%83%97%E3%83%AA%E3%82%92%E7%99%BB%E9%8C%B2%E3%81%99%E3%82%8B5%E5%88%86&project-name=msgraph-mcp-server&repository-name=msgraph-mcp-server&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17&skippable-integrations=1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **LP:** [daisukehori.github.io/msgraph-mcp-server](https://daisukehori.github.io/msgraph-mcp-server/)
@@ -86,7 +86,7 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 
 上の **Deploy with Vercel** ボタンをクリック。Upstash Redis のセットアップが自動で促されます（無料枠で十分）。
 
-環境変数を入力:
+環境変数 4 つを入力:
 
 | 変数 | 値 |
 |:--|:--|
@@ -94,7 +94,6 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 | `MICROSOFT_CLIENT_ID` | ステップ 1 でメモしたクライアント ID |
 | `MICROSOFT_CLIENT_SECRET` | ステップ 1 でメモしたシークレット |
 | `MICROSOFT_TENANT_ID` | ステップ 1 でメモしたテナント ID |
-| `TOKEN_ENCRYPTION_KEY` | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` で生成 |
 
 ### ステップ 3: リダイレクト URI を更新
 

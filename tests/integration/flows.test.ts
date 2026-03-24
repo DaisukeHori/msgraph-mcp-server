@@ -180,19 +180,24 @@ describe("結合テスト: セキュリティ境界", () => {
     expect(rotateRes.status).toBe(401);
   });
 
-  it("I12: 暗号化キーが異なると refresh_token が読めない", async () => {
-    // 正しいキーで保存
+  it("I12: 暗号化ソースが異なると refresh_token が読めない", async () => {
+    // TOKEN_ENCRYPTION_KEY を削除して自動派生パスを使う
+    const origKey = process.env.TOKEN_ENCRYPTION_KEY;
+    delete process.env.TOKEN_ENCRYPTION_KEY;
+
+    // 正しいソースで保存
     await saveRefreshToken("rt_secret");
 
-    // キーを変更
-    const original = process.env.TOKEN_ENCRYPTION_KEY;
-    process.env.TOKEN_ENCRYPTION_KEY = "different_key_123456789012345678901234567890";
+    // ソースを変更
+    const original = process.env.MICROSOFT_CLIENT_SECRET;
+    process.env.MICROSOFT_CLIENT_SECRET = "totally_different_secret_value_here";
 
     // 復号失敗（null が返る）
     const result = await getRefreshToken();
     expect(result).toBeNull();
 
-    process.env.TOKEN_ENCRYPTION_KEY = original;
+    process.env.MICROSOFT_CLIENT_SECRET = original;
+    process.env.TOKEN_ENCRYPTION_KEY = origKey;
   });
 
   it("I13: MCP API キー未生成で全 MCP リクエスト拒否", async () => {
