@@ -83,6 +83,8 @@ Exchange・Teams・OneDrive・SharePoint の **47 MCP ツール**を提供。
    **共有リソース（共有メールボックス・委任カレンダー）:**
    `Mail.Read.Shared` `Mail.ReadWrite.Shared` `Mail.Send.Shared` `Calendars.Read.Shared` `Calendars.ReadWrite.Shared`
 
+   > ℹ️ OneDrive・SharePoint・Teams の共有リソースは `Files.ReadWrite.All` / `Sites.ReadWrite.All` で既にカバーされているため、追加の `.Shared` スコープは不要です。
+
 6. 左メニュー → **認証** → **＋ プラットフォームを追加** → **「Web」を選択**
    - **リダイレクト URI**: `https://your-app.vercel.app/api/auth/callback`（Vercel デプロイ後に URL が確定してから入力。後からでも追加可能）
    - **フロントチャネルのログアウト URL**: 空のまま
