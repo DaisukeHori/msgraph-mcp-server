@@ -79,7 +79,12 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 
    `User.Read` `User.ReadBasic.All` `Mail.Read` `Mail.ReadWrite` `Mail.Send` `Calendars.Read` `Calendars.ReadWrite` `Team.ReadBasic.All` `Channel.ReadBasic.All` `ChannelMessage.Read.All` `ChannelMessage.Send` `Chat.Read` `Chat.ReadWrite` `ChatMessage.Read` `ChatMessage.Send` `Files.Read.All` `Files.ReadWrite.All` `Sites.Read.All` `Sites.ReadWrite.All` `offline_access`
 
-6. 左メニュー → **認証** → 下部 **リダイレクト URI** → **Web** → `https://your-app.vercel.app/api/auth/callback` を追加
+6. 左メニュー → **認証** → **＋ プラットフォームを追加** → **「Web」を選択**
+   - **リダイレクト URI**: `https://your-app.vercel.app/api/auth/callback`（Vercel デプロイ後に URL が確定してから入力。後からでも追加可能）
+   - **フロントチャネルのログアウト URL**: 空のまま
+   - **アクセストークン（暗黙的なフローに使用）**: **チェックしない**
+   - **ID トークン（暗黙的およびハイブリッド フローに使用）**: **チェックしない**
+   - 「構成」をクリックして保存
 7. **「[組織名] に管理者の同意を与えます」** をクリック
 
 ### ステップ 2: Vercel にデプロイ（2分）
@@ -97,8 +102,15 @@ Exchange・Teams・OneDrive・SharePoint の **45 MCP ツール**を提供。
 
 ### ステップ 3: リダイレクト URI を更新
 
-デプロイ完了後、Vercel の URL が確定したら Azure Portal に戻って:
-1. アプリの **認証** → **リダイレクト URI** に `https://your-app.vercel.app/api/auth/callback` を追加
+デプロイ完了後、Vercel の URL（例: `https://msgraph-mcp-server-xxx.vercel.app`）が確定したら Azure Portal に戻って:
+
+1. アプリの **認証** → Web プラットフォームの **リダイレクト URI** に以下を追加:
+   ```
+   https://あなたのアプリ名.vercel.app/api/auth/callback
+   ```
+2. 「保存」をクリック
+
+> ⚠️ ステップ 1 で既に入力済みなら、URL 部分を実際の Vercel URL に置き換えるだけです。
 
 ### ステップ 4: /auth で認証（1分）
 

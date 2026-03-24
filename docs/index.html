@@ -322,7 +322,15 @@
           <span class="tag">Sites.ReadWrite.All</span>
           <span class="tag">offline_access</span>
         </div>
-        <p style="margin-top:8px">⑦「<strong>管理者の同意を与えます</strong>」をクリック<br>⑧「認証」→ リダイレクト URI に <code>https://your-app.vercel.app/api/auth/callback</code> を追加（デプロイ後に URL 確定してから）</p>
+        <p style="margin-top:8px">
+          ⑦「<strong>管理者の同意を与えます</strong>」をクリック<br>
+          ⑧ 左メニュー →「<strong>認証</strong>」→「<strong>＋ プラットフォームを追加</strong>」→「<strong>Web</strong>」を選択<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;• リダイレクト URI: <code>https://your-app.vercel.app/api/auth/callback</code>（デプロイ後に URL 確定してから入力。後からでも追加可能）<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;• フロントチャネルのログアウト URL: <strong>空のまま</strong><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;• アクセストークン（暗黙的なフローに使用）: <strong>チェックしない</strong><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;• ID トークン（暗黙的およびハイブリッド フローに使用）: <strong>チェックしない</strong><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;→「構成」をクリックして保存
+        </p>
       </div>
 
       <div class="sc">
