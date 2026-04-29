@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>msgraph-mcp-server — Microsoft 365 を AI エージェントから操作する</title>
-  <meta name="description" content="Exchange・Teams・OneDrive・SharePoint の 48 ツールを MCP (Model Context Protocol) で提供。Claude や AI エージェントから Microsoft 365 を直接 CRUD 操作。">
+  <meta name="description" content="Exchange・Teams・OneDrive・SharePoint・Excel Workbook の 83 ツールを MCP (Model Context Protocol) で提供。Claude や AI エージェントから Microsoft 365 を直接 CRUD 操作。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -176,7 +176,7 @@
       <div class="hero-badge"><span class="dot"></span>MCP Server &middot; MIT ライセンス &middot; TypeScript</div>
       <h1><span class="br">Microsoft 365</span> を<br>AI エージェントから操作する</h1>
       <p class="hero-sub">
-        Exchange・Teams・OneDrive・SharePoint の 48 ツールを<br>
+        Exchange・Teams・OneDrive・SharePoint・Excel Workbook の 83 ツールを<br>
         Model Context Protocol (MCP) で Claude や AI エージェントに提供します。<br>
         メール送信、予定作成、ファイル管理、リスト操作 — すべて自然言語で。
       </p>
@@ -204,7 +204,7 @@
 
 <div class="ctn stats-sec">
   <div class="stats">
-    <div class="st"><div class="st-n">45</div><div class="st-l">MCP ツール</div></div>
+    <div class="st"><div class="st-n">83</div><div class="st-l">MCP ツール</div></div>
     <div class="st"><div class="st-n">6</div><div class="st-l">M365 ドメイン</div></div>
     <div class="st"><div class="st-n">3.1k</div><div class="st-l">行の TypeScript</div></div>
     <div class="st"><div class="st-n">2</div><div class="st-l">トランスポート</div></div>
@@ -231,9 +231,9 @@
         <div class="tags"><span class="tag">teams_list_joined_teams</span><span class="tag">teams_list_channels</span><span class="tag">teams_list_channel_messages</span><span class="tag">teams_send_channel_message</span><span class="tag">teams_reply_to_channel_message</span><span class="tag">teams_list_chats</span><span class="tag">teams_list_chat_messages</span><span class="tag">teams_send_chat_message</span></div>
       </div>
       <div class="dc">
-        <div class="dc-top"><div class="dc-in"><div class="dc-icon di4">☁️</div><span class="dc-name">OneDrive</span></div><span class="dc-cnt">9 ツール</span></div>
-        <p class="dc-desc">クラウドファイル操作。一覧・ダウンロード・アップロード・フォルダ作成・移動・検索。</p>
-        <div class="tags"><span class="tag">onedrive_get_drive</span><span class="tag">onedrive_list_items</span><span class="tag">onedrive_get_item</span><span class="tag">onedrive_download_file</span><span class="tag">onedrive_upload_file</span><span class="tag">onedrive_create_folder</span><span class="tag">onedrive_delete_item</span><span class="tag">onedrive_move_item</span><span class="tag">onedrive_search</span></div>
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di4">☁️</div><span class="dc-name">OneDrive</span></div><span class="dc-cnt">12 ツール</span></div>
+        <p class="dc-desc">クラウドファイル操作。一覧・DL・UL・フォルダ作成・移動・検索 + 共有ファイル一覧・共有フォルダ閲覧・共有リンク解決。</p>
+        <div class="tags"><span class="tag">onedrive_get_drive</span><span class="tag">onedrive_list_items</span><span class="tag">onedrive_get_item</span><span class="tag">onedrive_download_file</span><span class="tag">onedrive_upload_file</span><span class="tag">onedrive_create_folder</span><span class="tag">onedrive_delete_item</span><span class="tag">onedrive_move_item</span><span class="tag">onedrive_search</span><span class="tag">onedrive_shared_with_me</span><span class="tag">onedrive_shared_item_browse</span><span class="tag">onedrive_resolve_sharing_link</span></div>
       </div>
       <div class="dc">
         <div class="dc-top"><div class="dc-in"><div class="dc-icon di5">🏢</div><span class="dc-name">SharePoint</span></div><span class="dc-cnt">12 ツール</span></div>
@@ -244,6 +244,11 @@
         <div class="dc-top"><div class="dc-in"><div class="dc-icon di6">👤</div><span class="dc-name">ユーザー / 認証</span></div><span class="dc-cnt">3 ツール</span></div>
         <p class="dc-desc">プロフィール取得、組織内ユーザー検索、MSAL Device Code Flow 認証管理。</p>
         <div class="tags"><span class="tag">user_get_profile</span><span class="tag">user_search_users</span><span class="tag">auth_status</span></div>
+      </div>
+      <div class="dc" style="border-left:4px solid #16a34a;">
+        <div class="dc-top"><div class="dc-in"><div class="dc-icon di1">📊</div><span class="dc-name">Excel Workbook ★ NEW</span></div><span class="dc-cnt">35 ツール</span></div>
+        <p class="dc-desc">OneDrive / SharePoint 上の .xlsx を直接操作。シート/テーブル/行/列/範囲の CRUD、Excel 関数（VLOOKUP/SUM 等）、チャート作成、生シートへの書き込み、永続セッション管理。504/503/429 自動リトライ。</p>
+        <div class="tags"><span class="tag">workbook_create_session</span><span class="tag">workbook_close_session</span><span class="tag">workbook_list_worksheets</span><span class="tag">workbook_add_worksheet</span><span class="tag">workbook_create_table</span><span class="tag">workbook_table_add_rows</span><span class="tag">workbook_table_list_rows</span><span class="tag">workbook_table_update_row</span><span class="tag">workbook_table_delete_row</span><span class="tag">workbook_table_add_column</span><span class="tag">workbook_range_get</span><span class="tag">workbook_range_update</span><span class="tag">workbook_range_get_used</span><span class="tag">workbook_range_merge</span><span class="tag">workbook_call_function</span><span class="tag">workbook_create_chart</span><span class="tag">workbook_get_chart_image</span><span class="tag">+18 ツール</span></div>
       </div>
     </div>
   </div>
@@ -440,7 +445,7 @@
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://daisukehori.github.io/b2cloud-api/">b2cloud-api</a></td><td style="text-align:center;">14</td><td style="padding:8px;">ヤマト B2クラウド送り状発行 API/MCP</td></tr>
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://github.com/DaisukeHori/cloudflare-mcp">cloudflare-mcp</a></td><td style="text-align:center;">69</td><td style="padding:8px;">Cloudflare 統合（Tunnel/DNS/Workers/Pages/R2/KV/SSL/Access）</td></tr>
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://daisukehori.github.io/hubspot-ma-mcp/">hubspot-ma-mcp</a></td><td style="text-align:center;">128</td><td style="padding:8px;">HubSpot MA（CRM/Marketing/Knowledge Store）</td></tr>
-          <tr style="border-bottom:1px solid #e2e8f0;background:#f0fdf4;"><td style="padding:8px;"><strong>msgraph-mcp-server</strong> ← 今ここ</td><td style="text-align:center;">48</td><td style="padding:8px;">Microsoft Graph API（Exchange/Teams/OneDrive/SharePoint）</td></tr>
+          <tr style="border-bottom:1px solid #e2e8f0;background:#f0fdf4;"><td style="padding:8px;"><strong>msgraph-mcp-server</strong> ← 今ここ</td><td style="text-align:center;">83</td><td style="padding:8px;">Microsoft Graph API（Exchange/Teams/OneDrive/SharePoint/Excel Workbook）</td></tr>
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://daisukehori.github.io/playwright-devtools-mcp/">playwright-devtools-mcp</a></td><td style="text-align:center;">57</td><td style="padding:8px;">Playwright + Chrome DevTools（ブラウザ自動化）</td></tr>
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://daisukehori.github.io/proxmox-mcp-server/">proxmox-mcp-server</a></td><td style="text-align:center;">35</td><td style="padding:8px;">Proxmox VE 仮想化基盤操作</td></tr>
           <tr style="border-bottom:1px solid #e2e8f0;"><td style="padding:8px;"><a href="https://daisukehori.github.io/printer-mcp-server/">printer-mcp-server</a></td><td style="text-align:center;">—</td><td style="padding:8px;">CUPS ネットワークプリンタ制御（Kyocera TASKalfa）</td></tr>

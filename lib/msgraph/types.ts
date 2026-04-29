@@ -208,3 +208,83 @@ export interface SharePointColumn {
   required?: boolean;
 }
 
+
+// ============================================================
+// Excel Workbook
+// ============================================================
+
+/** Workbook セッション情報 */
+export interface WorkbookSessionInfo {
+  id: string;
+  persistChanges: boolean;
+}
+
+/** Worksheet（シート） */
+export interface WorkbookWorksheet {
+  id: string;
+  name: string;
+  position: number;
+  /** "Visible" | "Hidden" | "VeryHidden" */
+  visibility?: string;
+}
+
+/** Workbook Table（構造化テーブル） */
+export interface WorkbookTable {
+  id: string;
+  name: string;
+  /** worksheet レベルから取得した場合のみ */
+  showHeaders?: boolean;
+  showTotals?: boolean;
+  showBandedRows?: boolean;
+  showBandedColumns?: boolean;
+  showFilterButton?: boolean;
+  highlightFirstColumn?: boolean;
+  highlightLastColumn?: boolean;
+  legacyId?: string;
+  style?: string;
+}
+
+/** Table Row（テーブル行） */
+export interface WorkbookTableRow {
+  index: number;
+  values: unknown[][];
+}
+
+/** Table Column（テーブル列） */
+export interface WorkbookTableColumn {
+  id: string;
+  name: string;
+  index: number;
+  values?: unknown[][];
+}
+
+/** Range（セル範囲） */
+export interface WorkbookRange {
+  address: string;
+  addressLocal?: string;
+  cellCount: number;
+  columnCount: number;
+  rowCount: number;
+  columnIndex?: number;
+  rowIndex?: number;
+  values: unknown[][];
+  text?: string[][];
+  formulas?: unknown[][];
+  formulasLocal?: unknown[][];
+  numberFormat?: unknown[][];
+  valueTypes?: unknown[][];
+  hidden?: boolean;
+  rowHidden?: boolean;
+  columnHidden?: boolean;
+  formulasR1C1?: unknown[][];
+}
+
+/** Chart（グラフ） */
+export interface WorkbookChart {
+  id: string;
+  name: string;
+  height?: number;
+  width?: number;
+  left?: number;
+  top?: number;
+}

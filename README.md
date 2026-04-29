@@ -7,7 +7,7 @@
 
 > **LP:** [daisukehori.github.io/msgraph-mcp-server](https://daisukehori.github.io/msgraph-mcp-server/)
 
-Exchange・Teams・OneDrive・SharePoint の **48 MCP ツール**を提供。
+Exchange・Teams・OneDrive・SharePoint・**Excel Workbook** の **83 MCP ツール**を提供。
 すべて `/me/` エンドポイントを使い、**操作者本人のデータ**にアクセスします。
 
 ---
@@ -192,7 +192,7 @@ claude mcp add --transport http microsoft365 "https://your-app.vercel.app/api/mc
 
 ---
 
-## ツール一覧（48 ツール）
+## ツール一覧（83 ツール）
 
 | カテゴリ | ツール数 | 主な操作 |
 |:--|:--|:--|
@@ -202,6 +202,26 @@ claude mcp add --transport http microsoft365 "https://your-app.vercel.app/api/mc
 | **OneDrive** | 12 | ドライブ情報・一覧/取得/DL/UL/フォルダ作成/削除/移動/検索 + **共有ファイル一覧・共有フォルダ閲覧・共有リンク解決** |
 | **SharePoint** | 12 | サイト検索/取得・ライブラリ・リスト/カラム/アイテム CRUD |
 | **ユーザー / 認証** | 3 | プロフィール・ユーザー検索・認証ステータス |
+| **Excel Workbook** ★ | **35** | セッション管理 / シート CRUD / テーブル CRUD / 行・列の追加/更新/削除 / 範囲読み書き / 関数実行（VLOOKUP, SUM 等）/ チャート作成 |
+
+### Excel Workbook ツール詳細（35 ツール）
+
+| サブカテゴリ | ツール |
+|:--|:--|
+| **Sessions (2)** | `workbook_create_session`, `workbook_close_session` |
+| **Worksheets (5)** | `workbook_list_worksheets`, `workbook_get_worksheet`, `workbook_add_worksheet`, `workbook_update_worksheet`, `workbook_delete_worksheet` |
+| **Tables (6)** | `workbook_list_tables`, `workbook_get_table`, `workbook_create_table`, `workbook_update_table`, `workbook_delete_table`, `workbook_table_convert_to_range` |
+| **Table Rows (5)** | `workbook_table_add_rows` ★, `workbook_table_list_rows`, `workbook_table_get_row`, `workbook_table_update_row`, `workbook_table_delete_row` |
+| **Table Columns (4)** | `workbook_table_list_columns`, `workbook_table_add_column`, `workbook_table_update_column`, `workbook_table_delete_column` |
+| **Range (8)** | `workbook_range_get`, `workbook_range_update` ★, `workbook_range_clear`, `workbook_range_get_used`, `workbook_range_insert`, `workbook_range_delete`, `workbook_range_merge`, `workbook_range_unmerge` |
+| **Functions (1)** | `workbook_call_function`（300+ Excel 関数） |
+| **Charts (4)** | `workbook_list_charts`, `workbook_create_chart`, `workbook_get_chart_image`, `workbook_delete_chart` |
+
+> 💡 **セッション運用の推奨**: 複数操作をまとめる場合は `workbook_create_session` でセッションIDを取得し、各ツール呼び出しに `workbook_session_id` を渡すと **パフォーマンスが向上**し、変更が **他クライアントに即時反映**される（セッションなしだと最大2分のラグ）。
+>
+> 💡 **行追加 vs 生シート書き込み**: 構造化されたテーブルへの行追加は `workbook_table_add_rows`、テーブル化されていない生のシートへの書き込みは `workbook_range_update` を使う。
+>
+> 💡 **504/503/429 自動リトライ**: 全ツールに自動リトライ機構（指数バックオフ + Retry-After 尊重）が組み込まれている。Excel Workbook API でたまに発生する一時的な 504 にも堅牢。
 
 ---
 
@@ -251,7 +271,7 @@ MIT
 | **[b2cloud-api](https://github.com/DaisukeHori/b2cloud-api)** | 14 | ヤマト B2クラウド送り状発行 API/MCP |
 | **[cloudflare-mcp](https://github.com/DaisukeHori/cloudflare-mcp)** | 69 | Cloudflare 統合（Tunnel/DNS/Workers/Pages/R2/KV/SSL/Access） |
 | **[hubspot-ma-mcp](https://github.com/DaisukeHori/hubspot-ma-mcp)** | 128 | HubSpot MA（CRM/Marketing/Knowledge Store） |
-| **msgraph-mcp-server** ← 今ここ | 48 | Microsoft Graph API（Exchange/Teams/OneDrive/SharePoint） |
+| **msgraph-mcp-server** ← 今ここ | 83 | Microsoft Graph API（Exchange/Teams/OneDrive/SharePoint/Excel Workbook） |
 | **[playwright-devtools-mcp](https://github.com/DaisukeHori/playwright-devtools-mcp)** | 57 | Playwright + Chrome DevTools（ブラウザ自動化） |
 | **[proxmox-mcp-server](https://github.com/DaisukeHori/proxmox-mcp-server)** | 35 | Proxmox VE 仮想化基盤操作 |
 | **[printer-mcp-server](https://github.com/DaisukeHori/printer-mcp-server)** | — | CUPS ネットワークプリンタ制御（Kyocera TASKalfa） |
