@@ -129,8 +129,8 @@ Args:
   - persist_changes (default: true): true=永続セッション（変更を保存）、false=非永続（一時的な計算用）
   - drive_id / user_id: optional
 
-Returns: { id: string, persistChanges: boolean }
-  → この id を以降のツール呼び出しで workbook_session_id として渡す`,
+Returns: { workbook_session_id: string, persistChanges: boolean, hint: string }
+  → この workbook_session_id を以降のツール呼び出しで workbook_session_id として渡す`,
       inputSchema: {
         ...fileLocatorSchema,
         // workbook_session_id はこのツールでは使わないが、スキーマ統一のため許容
@@ -253,7 +253,7 @@ Args:
   - item_id / path (どちらか必須)
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: シート配列（id, name, position, visibility）`,
+Returns: { count: number, worksheets: [{ id, name, position, visibility }] }`,
       inputSchema: { ...fileLocatorSchema },
       annotations: {
         readOnlyHint: true,
@@ -527,7 +527,7 @@ Args:
   - worksheet: シート ID または名前。省略時はブック全体のテーブル一覧
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: テーブル配列（id, name, showHeaders, showTotals 等）`,
+Returns: { count: number, tables: [{ id, name, showHeaders, showTotals, ... }] }`,
       inputSchema: {
         ...fileLocatorSchema,
         worksheet: z
@@ -961,7 +961,7 @@ Args:
   - skip: スキップ件数（ページネーション）
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: 行配列（index, values）`,
+Returns: { count: number, rows: [{ index, values }] }`,
       inputSchema: {
         ...fileLocatorSchema,
         table: z.string().min(1).describe("テーブル ID または名前"),
@@ -1178,7 +1178,7 @@ Args:
   - table (必須): テーブル ID または名前
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: 列配列（id, name, index, values）`,
+Returns: { count: number, columns: [{ id, name, index, values }] }`,
       inputSchema: {
         ...fileLocatorSchema,
         table: z.string().min(1).describe("テーブル ID または名前"),
@@ -1963,7 +1963,7 @@ Args:
   - worksheet (必須): シート ID または名前
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: チャート配列（id, name, height, width, top, left）`,
+Returns: { count: number, charts: [{ id, name, height, width, top, left }] }`,
       inputSchema: {
         ...fileLocatorSchema,
         worksheet: z.string().min(1).describe("シート ID または名前"),
@@ -2094,7 +2094,7 @@ Args:
   - fitting_mode (default: "Fit"): "Fit" | "FitAndCenter" | "Fill"
   - drive_id / user_id / workbook_session_id: optional
 
-Returns: { value: "base64-encoded-png" }`,
+Returns: { chart, format: "base64-png", size_bytes, base64_preview, base64 }`,
       inputSchema: {
         ...fileLocatorSchema,
         worksheet: z.string().min(1).describe("シート ID または名前"),
