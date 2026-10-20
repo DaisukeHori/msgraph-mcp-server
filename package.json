@@ -41,7 +41,7 @@
     "url": "https://github.com/DaisukeHori/msgraph-mcp-server/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.32.0",
     "@upstash/redis": "^1.37.0",
     "mcp-handler": "^1.0.7",
     "next": "^15",
